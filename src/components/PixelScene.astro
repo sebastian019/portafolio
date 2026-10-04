@@ -187,7 +187,7 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
     {suelo.map((p) => <rect class="ground-px" x={p.x} y="58" width="1" height="1" />)}
 
     <!-- Bloque y brasa: JS los mueve en X según el ancho disponible -->
-    <g class="poi" transform="translate(74 0)" data-poi>
+    <g class="poi" transform="translate(154 0)" data-poi>
       <!-- La brasa va antes que el bloque para quedar "dentro" de él al inicio -->
       <g class="ember">
         <circle class="ember-glow" cx="6" cy="18" r="11" fill="url(#brasa-glow)" />
@@ -236,11 +236,16 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
       if (!width) return;
       const scale = width < 560 ? 2 : 3;
       const cols = Math.min(400, Math.floor(width / scale));
-      const blockX = Math.round(cols * 0.3);
+      const blockX = Math.round(cols / 2) - 6; // bloque (12 px) centrado
+      const stop = blockX + 2; // robot (9 px) centrado bajo el bloque
+      const exit = cols + 4; // fuera de cuadro por la derecha
       svg.setAttribute('viewBox', `0 0 ${cols} 60`);
       poi.setAttribute('transform', `translate(${blockX} 0)`);
-      root.style.setProperty('--stop', `${blockX + 2}px`); // robot centrado bajo el bloque
-      root.style.setProperty('--exit', `${cols + 4}px`); // fuera de cuadro
+      root.style.setProperty('--stop', `${stop}px`);
+      root.style.setProperty('--exit', `${exit}px`);
+      // Entrada y salida recorren la misma distancia en el mismo tiempo:
+      // así el robot camina siempre a la misma velocidad.
+      root.style.setProperty('--start', `${Math.min(-12, 2 * stop - exit)}px`);
     };
 
     const play = () => {
@@ -269,7 +274,9 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
     --dur: 6s;
     --delay: 0.6s;
     --float: 2.8s;
-    --stop: 76px;
+    /* Valores sin JS (viewBox de 320); JS los recalcula según el ancho */
+    --start: -12px;
+    --stop: 156px;
     --exit: 324px;
     position: relative;
     margin-top: clamp(2.5rem, 6vw, 3.5rem);
@@ -352,9 +359,10 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
   }
 
   @keyframes robot-x {
-    0% { transform: translateX(-12px); animation-timing-function: steps(48); }
+    /* Mismo número de pasos en ambos tramos = misma velocidad */
+    0% { transform: translateX(var(--start)); animation-timing-function: steps(60); }
     33.33% { transform: translateX(var(--stop)); }
-    56.67% { transform: translateX(var(--stop)); animation-timing-function: steps(64); }
+    56.67% { transform: translateX(var(--stop)); animation-timing-function: steps(60); }
     90%, 100% { transform: translateX(var(--exit)); }
   }
   @keyframes robot-y {

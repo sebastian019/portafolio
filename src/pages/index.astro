@@ -12,10 +12,6 @@ import { perfil, contactos } from '../data/perfil';
 const proyectos = (await getCollection('proyectos')).sort(
   (a, b) => a.data.orden - b.data.orden || b.data.inicio.getTime() - a.data.inicio.getTime(),
 );
-
-// Contacto: el correo se muestra con su icono y texto; el resto, solo icono.
-const correo = contactos.find((c) => !c.externo)!;
-const redes = contactos.filter((c) => c.externo);
 ---
 
 <BaseLayout>
@@ -62,28 +58,24 @@ const redes = contactos.filter((c) => c.externo);
     <p class="contact-lead reveal">
       Estoy buscando práctica profesional. Si te interesa conversar, escríbeme.
     </p>
-    <div class="contact reveal">
-      <a class="mail" href={correo.href}>
-        <Icon name="mail" size={22} />
-        <span>{correo.texto}</span>
-      </a>
-      <ul class="socials">
-        {redes.map((r) => (
-          <li>
-            <a
-              class="icon-link"
-              href={r.href}
-              target="_blank"
-              rel="noopener"
-              aria-label={`${r.etiqueta} (se abre en una pestaña nueva)`}
-              title={r.etiqueta}
-            >
-              <Icon name={r.icono} size={22} />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <!-- Los tres contactos con el mismo formato: icono en círculo y nombre debajo -->
+    <ul class="contact reveal">
+      {contactos.map((c) => (
+        <li>
+          <a
+            class="contact-item"
+            href={c.href}
+            {...(c.externo ? { target: '_blank', rel: 'noopener' } : {})}
+          >
+            <span class="icon-circle"><Icon name={c.icono} size={22} /></span>
+            <span class="label">{c.etiqueta}</span>
+            {c.externo && <span class="sr-only"> (se abre en una pestaña nueva)</span>}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <!-- La dirección queda a la vista (y se puede copiar), en texto discreto -->
+    <p class="mail-text reveal">{perfil.enlaces.correo}</p>
   </Section>
 </BaseLayout>
 
@@ -138,41 +130,46 @@ const redes = contactos.filter((c) => c.externo);
   .contact {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 1.25rem 2rem;
-    margin-top: 2.5rem;
-  }
-  .mail {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: clamp(1rem, 2.6vw, 1.15rem);
-    overflow-wrap: anywhere;
-  }
-  .mail :global(.icon) {
-    flex: none;
-  }
-  .socials {
-    display: flex;
-    gap: 0.75rem;
+    gap: 1.5rem 2.25rem;
     list-style: none;
-    margin: 0;
+    margin: 2.5rem 0 0;
     padding: 0;
   }
-  /* Botón circular de 44 px: área táctil cómoda en celular */
-  .icon-link {
+  .contact-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  /* Círculo de 44 px: área táctil cómoda en celular */
+  .icon-circle {
     display: grid;
     place-items: center;
     width: 2.75rem;
     height: 2.75rem;
     border: 1px solid var(--border);
     border-radius: 50%;
-    color: var(--text-muted);
     transition: color 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
   }
-  .icon-link:hover {
+  .label {
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    transition: color 0.2s var(--ease);
+  }
+  .contact-item:hover {
+    color: var(--text);
+  }
+  .contact-item:hover .icon-circle {
     color: var(--accent);
     border-color: var(--accent);
     transform: translateY(-2px);
+  }
+  .mail-text {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
   }
 </style>
