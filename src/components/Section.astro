@@ -1,17 +1,26 @@
 ---
 // Sección de la portada con título numerado (el número va en naranja).
+// Al entrar en pantalla, el título se "construye": se descubre de izquierda a
+// derecha en pasos (como píxeles) y una fila de bloques se arma y se
+// desvanece debajo. Va en el margen del título: nunca tapa el contenido.
 interface Props {
   id: string;
   numero: string;
   titulo: string;
 }
 const { id, numero, titulo } = Astro.props;
+
+// Bloques de la transición (tono alternado para que no se vea plano)
+const bloques = Array.from({ length: 12 }, (_, i) => ['a', 'l', 'a', 'k'][i % 4]);
 ---
 
 <section id={id} class="section container" aria-labelledby={`${id}-titulo`}>
   <header class="section-head reveal">
     <span class="num" aria-hidden="true">{numero}</span>
     <h2 id={`${id}-titulo`}>{titulo}</h2>
+    <span class="build" aria-hidden="true">
+      {bloques.map((tono, i) => <i class={`b-${tono}`} style={`--i: ${i}`}></i>)}
+    </span>
   </header>
   <div class="section-body">
     <slot />
@@ -23,6 +32,7 @@ const { id, numero, titulo } = Astro.props;
     padding-top: var(--section-gap);
   }
   .section-head {
+    position: relative;
     display: flex;
     align-items: baseline;
     gap: 1rem;
@@ -36,5 +46,51 @@ const { id, numero, titulo } = Astro.props;
   }
   h2 {
     font-size: clamp(2rem, 6vw, 3rem);
+  }
+
+  /* ---------- Transición "construyéndose" (solo con JS) ---------- */
+  .build {
+    position: absolute;
+    left: 0;
+    bottom: -0.9rem;
+    display: flex;
+    gap: 3px;
+    pointer-events: none;
+  }
+  .build i {
+    width: 6px;
+    height: 6px;
+    opacity: 0;
+  }
+  .b-a { background: var(--accent); }
+  .b-l { background: var(--accent-light); }
+  .b-k { background: var(--accent-deep); }
+
+  /* El título se descubre en 8 pasos de izquierda a derecha */
+  :global(.js) .section-head h2 {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.55s steps(8) 0.1s;
+  }
+  :global(.js) .section-head:global(.is-visible) h2 {
+    clip-path: inset(0 -1rem 0 0); /* margen para no cortar letras con cola */
+  }
+  /* Los bloques aparecen uno tras otro y luego se desvanecen */
+  :global(.js) .section-head:global(.is-visible) .build i {
+    animation: build 0.9s ease-out calc(var(--i) * 35ms) both;
+  }
+  @keyframes build {
+    0% { opacity: 0; transform: scale(0.3); }
+    25% { opacity: 1; transform: scale(1); }
+    65% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .section-head h2 {
+      clip-path: none;
+    }
+    .build {
+      display: none;
+    }
   }
 </style>

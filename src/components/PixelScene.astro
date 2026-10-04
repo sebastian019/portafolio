@@ -393,6 +393,9 @@ const zeta = sprite(['llll', '..l.', '.l..', 'llll']);
     title="Golpear el bloque"
   ></button>
 
+  <!-- Frase ocasional que trae el objeto (se anuncia a lectores de pantalla) -->
+  <p class="phrase" data-phrase aria-live="polite"></p>
+
   <!-- Zona de hover del mini bot (solo decorativa: abre un ojo) -->
   <span class="minibot-hit" data-minibot-hit aria-hidden="true"></span>
 
@@ -407,6 +410,15 @@ const zeta = sprite(['llll', '..l.', '.l..', 'llll']);
   const OBJETOS = ['brasa', 'moneda', 'engranaje', 'chip', 'vela'];
   // Momento en que el objeto sale del bloque: --delay (0,6 s) + 2,3 s del golpe.
   const SALIDA_MS = 2900;
+
+  // Frases que a veces trae el objeto. Solo estas: no agregar otras inventadas.
+  const FRASES = [
+    'Buscando práctica profesional 2027',
+    'Ask me about multi-agent systems',
+    'IA aplicada a finanzas',
+  ];
+  const PROB_FRASE = 0.4; // "de vez en cuando": ~4 de cada 10 reproducciones
+  const FRASE_MS = 3500; // tiempo que queda visible antes de desvanecerse
 
   // Dígitos pixelados de 3 × 5 (1 = píxel encendido) y una "x" para el contador.
   const GLIFOS: Record<string, string[]> = {
@@ -431,6 +443,31 @@ const zeta = sprite(['llll', '..l.', '.l..', 'llll']);
     const blockHit = root.querySelector<HTMLButtonElement>('[data-block-hit]')!;
     const miniBot = root.querySelector<SVGGElement>('[data-minibot]')!;
     const miniBotHit = root.querySelector<HTMLElement>('[data-minibot-hit]')!;
+    const phrase = root.querySelector<HTMLElement>('[data-phrase]')!;
+    let ultimaFrase = '';
+    let fraseTimers: number[] = [];
+
+    const ocultarFrase = () => {
+      fraseTimers.forEach(clearTimeout);
+      fraseTimers = [];
+      phrase.classList.remove('is-visible');
+    };
+
+    // A veces, el objeto trae una frase: aparece unos segundos y se desvanece.
+    const quizasFrase = (espera: number) => {
+      ocultarFrase();
+      if (Math.random() >= PROB_FRASE) return;
+      const opciones = FRASES.filter((f) => f !== ultimaFrase);
+      ultimaFrase = opciones[Math.floor(Math.random() * opciones.length)];
+      fraseTimers.push(
+        window.setTimeout(() => {
+          phrase.textContent = ultimaFrase;
+          phrase.lang = ultimaFrase.startsWith('Ask') ? 'en' : 'es';
+          phrase.classList.add('is-visible');
+        }, espera),
+        window.setTimeout(() => phrase.classList.remove('is-visible'), espera + FRASE_MS),
+      );
+    };
 
     // El contador vive solo en memoria: no se guarda entre visitas.
     let total = 0;
@@ -513,12 +550,14 @@ const zeta = sprite(['llll', '..l.', '.l..', 'llll']);
       if (motion.matches) {
         // Sin movimiento: el objeto aparece directo en su lugar.
         obtener();
+        quizasFrase(0);
         return;
       }
       root.classList.remove('is-playing');
       void root.offsetWidth; // fuerza un reflow para reiniciar las animaciones CSS
       root.classList.add('is-playing');
       timer = window.setTimeout(obtener, SALIDA_MS);
+      quizasFrase(SALIDA_MS + 300);
     };
 
     const sync = () => {
@@ -640,6 +679,34 @@ const zeta = sprite(['llll', '..l.', '.l..', 'llll']);
     20% { opacity: 0.7; }
     100% { transform: translate(-7px, 35px); opacity: 0; }
   }
+  /* Frase ocasional: etiqueta discreta centrada sobre el objeto */
+  .phrase {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: fit-content;
+    max-width: calc(100% - 6rem); /* deja libres el contador y el botón */
+    margin: 0 auto;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    text-align: center;
+    background: rgba(20, 17, 16, 0.85);
+    border: 1px solid var(--accent-deep);
+    border-radius: 999px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    pointer-events: none;
+  }
+  .phrase.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
   /* Zona de hover sobre el mini bot: abre un ojo y deja de roncar */
   .minibot-hit { position: absolute; }
   .pixel-scene:has(.minibot-hit:hover) .eye-open { opacity: 1; }
