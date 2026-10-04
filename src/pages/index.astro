@@ -65,10 +65,12 @@ const proyectos = (await getCollection('proyectos')).sort(
           <a
             class="contact-item"
             href={c.href}
-            {...(c.externo ? { target: '_blank', rel: 'noopener' } : {})}
+            {...(c.externo
+              ? { target: '_blank', rel: 'noopener' }
+              : { 'data-copy': perfil.enlaces.correo, title: 'Copiar correo' })}
           >
             <span class="icon-circle"><Icon name={c.icono} size={22} /></span>
-            <span class="label">{c.etiqueta}</span>
+            <span class="label" data-label>{c.etiqueta}</span>
             {c.externo && <span class="sr-only"> (se abre en una pestaña nueva)</span>}
           </a>
         </li>
@@ -76,8 +78,54 @@ const proyectos = (await getCollection('proyectos')).sort(
     </ul>
     <!-- La dirección queda a la vista (y se puede copiar), en texto discreto -->
     <p class="mail-text reveal">{perfil.enlaces.correo}</p>
+    <!-- Anuncia "copiado" a lectores de pantalla -->
+    <p class="sr-only" aria-live="polite" data-copy-status></p>
   </Section>
 </BaseLayout>
+
+<script>
+  // El botón de correo copia la dirección al portapapeles y muestra
+  // "¡Copiado!". El mailto: sigue funcionando para quien tenga un programa
+  // de correo configurado; si no lo tiene, al menos queda copiada.
+  const status = document.querySelector<HTMLElement>('[data-copy-status]');
+
+  /** Copia texto al portapapeles; si la API moderna no está disponible, usa el método clásico. */
+  async function copiar(texto: string): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(texto);
+      return true;
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = texto;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.append(area);
+      area.select();
+      const ok = document.execCommand('copy');
+      area.remove();
+      return ok;
+    }
+  }
+  document.querySelectorAll<HTMLAnchorElement>('[data-copy]').forEach((link) => {
+    const label = link.querySelector<HTMLElement>('[data-label]');
+    const original = label?.textContent ?? '';
+    let timer: number | undefined;
+
+    link.addEventListener('click', async () => {
+      if (!(await copiar(link.dataset.copy ?? ''))) return; // queda solo el mailto:
+      if (label) label.textContent = '¡Copiado!';
+      link.classList.add('is-copied');
+      if (status) status.textContent = 'Correo copiado al portapapeles';
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        if (label) label.textContent = original;
+        link.classList.remove('is-copied');
+        if (status) status.textContent = '';
+      }, 2000);
+    });
+  });
+</script>
 
 <style>
   .projects {
@@ -161,7 +209,11 @@ const proyectos = (await getCollection('proyectos')).sort(
   .contact-item:hover {
     color: var(--text);
   }
-  .contact-item:hover .icon-circle {
+  .contact-item.is-copied {
+    color: var(--accent);
+  }
+  .contact-item:hover .icon-circle,
+  .contact-item.is-copied .icon-circle {
     color: var(--accent);
     border-color: var(--accent);
     transform: translateY(-2px);
