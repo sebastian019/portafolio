@@ -1,7 +1,9 @@
 ---
 // Escena de pixel art de la portada (personaje original: un pequeño robot).
-// Secuencia al cargar: entra caminando, salta, golpea el bloque "?", sale una
-// brasa que queda levitando y el robot se va. De fondo, un bosque cyberpunk.
+// Secuencia al cargar: entra caminando, salta, golpea el bloque "?", sale un
+// objeto al azar que queda levitando y el robot se va. Un contador suma los
+// objetos obtenidos y al hacer clic en el bloque se repite. De fondo, un bosque
+// cyberpunk con montañas.
 //
 // Todo es SVG + CSS. JS ajusta el ancho de la escena al contenedor, agrega la
 // clase que inicia la animación y maneja el botón de repetir. Con
@@ -66,16 +68,59 @@ const bloque = sprite([
   '.oooooooooo.',
 ], 0, 24);
 
-// Brasa (5 × 7). y: núcleo · l: claro · a: acento · k: borde oscuro
-const brasa = sprite([
-  '..l..',
-  '.ala.',
-  '.ala.',
-  'kalak',
-  'kayak',
-  '.kak.',
-  '..k..',
-], 4, 15);
+// Objetos que puede soltar el bloque (7 × 7 cada uno, todos diseño propio).
+// y: núcleo · l: claro · a: acento · k: naranja oscuro · d: relleno oscuro
+const objetos = {
+  brasa: sprite([
+    '...l...',
+    '..ala..',
+    '..ala..',
+    '.kalak.',
+    '.kayak.',
+    '..kak..',
+    '...k...',
+  ], 3, 15),
+  moneda: sprite([
+    '..kkk..',
+    '.kllak.',
+    'klaaaak',
+    'klayaak',
+    'kaaaaak',
+    '.kaaak.',
+    '..kkk..',
+  ], 3, 15),
+  // El engranaje necesita 9 × 9 para que se lean los dientes (mismo centro y base)
+  engranaje: sprite([
+    '...lal...',
+    '.l.lal.a.',
+    '..laaaa..',
+    'lla...aak',
+    'lla...akk',
+    'laa...akk',
+    '..aaakk..',
+    '.a.akk.k.',
+    '...akk...',
+  ], 2, 13),
+  chip: sprite([
+    '.l.l.l.',
+    'lkkkkkl',
+    '.kdddk.',
+    'lkdydkl',
+    '.kdddk.',
+    'lkkkkkl',
+    '.l.l.l.',
+  ], 3, 15),
+  // Dos velas de un gráfico de bolsa: una baja (hueca) y una alza (rellena)
+  vela: sprite([
+    '.....l.',
+    '....aaa',
+    '.k..aya',
+    'kkk.aya',
+    'k.k.aaa',
+    'kkk..k.',
+    '.k...k.',
+  ], 3, 15),
+};
 
 // ---------- Bosque cyberpunk (generado al compilar, siempre igual) ----------
 // Generador pseudoaleatorio con semilla fija: el dibujo no cambia entre builds.
@@ -223,17 +268,24 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
     <rect class="ground" x="0" y={SUELO} width={MAX_COLS} height="1" />
     {suelo.map((p) => <rect class="ground-px" x={p.x} y="58" width="1" height="1" />)}
 
-    <!-- Bloque y brasa: JS los mueve en X según el ancho disponible -->
+    <!-- Bloque y objeto: JS los mueve en X según el ancho disponible -->
     <g class="poi" transform="translate(154 0)" data-poi>
-      <!-- La brasa va antes que el bloque para quedar "dentro" de él al inicio -->
+      <!-- El objeto va antes que el bloque para quedar "dentro" de él al inicio.
+           Se dibujan los cinco y CSS muestra solo el elegido (data-item). -->
       <g class="ember">
         <circle class="ember-glow" cx="6" cy="18" r="11" fill="url(#brasa-glow)" />
-        {brasa.map((p) => <rect class={`px-${p.c}`} x={p.x} y={p.y} width={p.w} height="1" />)}
+        {Object.entries(objetos).map(([nombre, pixeles]) => (
+          <g class={`item item-${nombre}`}>
+            {pixeles.map((p) => <rect class={`px-${p.c}`} x={p.x} y={p.y} width={p.w} height="1" />)}
+          </g>
+        ))}
         <rect class="spark spark-1 px-l" x="2" y="16" width="1" height="1" />
         <rect class="spark spark-2 px-a" x="10" y="14" width="1" height="1" />
       </g>
       <g class="block">
-        {bloque.map((p) => <rect class={`px-${p.c}`} x={p.x} y={p.y} width={p.w} height="1" />)}
+        <g class="block-hop">
+          {bloque.map((p) => <rect class={`px-${p.c}`} x={p.x} y={p.y} width={p.w} height="1" />)}
+        </g>
       </g>
     </g>
 
@@ -251,7 +303,20 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
         </g>
       </g>
     </g>
+
+    <!-- Contador de objetos (lo dibuja JS con dígitos de 3 × 5 px) -->
+    <g class="counter" transform="translate(3 3)" data-counter></g>
   </svg>
+
+  <!-- Zona clicable sobre el bloque (botón HTML real: foco, Enter y Espacio) -->
+  <button
+    type="button"
+    class="block-hit"
+    data-block-hit
+    hidden
+    aria-label="Golpear el bloque: sale un objeto nuevo"
+    title="Golpear el bloque"
+  ></button>
 
   <button type="button" class="replay" data-replay hidden aria-label="Repetir animación" title="Repetir animación">
     <Icon name="replay" size={14} />
@@ -261,10 +326,36 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
 <script>
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  const OBJETOS = ['brasa', 'moneda', 'engranaje', 'chip', 'vela'];
+  // Momento en que el objeto sale del bloque: --delay (0,6 s) + 2,3 s del golpe.
+  const SALIDA_MS = 2900;
+
+  // Dígitos pixelados de 3 × 5 (1 = píxel encendido) y una "x" para el contador.
+  const GLIFOS: Record<string, string[]> = {
+    '0': ['111', '101', '101', '101', '111'],
+    '1': ['010', '110', '010', '010', '111'],
+    '2': ['111', '001', '111', '100', '111'],
+    '3': ['111', '001', '111', '001', '111'],
+    '4': ['101', '101', '111', '001', '001'],
+    '5': ['111', '100', '111', '001', '111'],
+    '6': ['111', '100', '111', '101', '111'],
+    '7': ['111', '001', '010', '010', '010'],
+    '8': ['111', '101', '111', '101', '111'],
+    '9': ['111', '101', '111', '001', '111'],
+    x: ['000', '101', '010', '101', '000'],
+  };
+
   document.querySelectorAll<HTMLElement>('[data-pixel-scene]').forEach((root) => {
     const svg = root.querySelector<SVGSVGElement>('[data-scene]')!;
     const poi = root.querySelector<SVGGElement>('[data-poi]')!;
+    const counter = root.querySelector<SVGGElement>('[data-counter]')!;
     const button = root.querySelector<HTMLButtonElement>('[data-replay]');
+    const blockHit = root.querySelector<HTMLButtonElement>('[data-block-hit]')!;
+
+    // El contador vive solo en memoria: no se guarda entre visitas.
+    let total = 0;
+    let ultimo = '';
+    let timer: number | undefined;
 
     // Ajusta el dibujo al ancho del contenedor manteniendo píxeles nítidos:
     // 2 px de pantalla por píxel en celular y 3 en pantallas más anchas.
@@ -283,13 +374,62 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
       // Entrada y salida recorren la misma distancia en el mismo tiempo:
       // así el robot camina siempre a la misma velocidad.
       root.style.setProperty('--start', `${Math.min(-12, 2 * stop - exit)}px`);
+      // Zona clicable: el bloque más 4 px de margen por lado (más fácil de tocar).
+      Object.assign(blockHit.style, {
+        left: `${((blockX - 4) / cols) * 100}%`,
+        width: `${(20 / cols) * 100}%`,
+        top: `${(20 / 60) * 100}%`,
+        height: `${(20 / 60) * 100}%`,
+      });
+    };
+
+    // Dibuja "[bloque] x N" con píxeles.
+    const dibujarContador = () => {
+      const rects: string[] = [];
+      const px = (x: number, y: number, cls: string) =>
+        rects.push(`<rect class="${cls}" x="${x}" y="${y}" width="1" height="1"/>`);
+      // Icono: el bloque en miniatura (5 × 5: borde y un punto al centro)
+      ['11111', '10001', '10101', '10001', '11111'].forEach((fila, y) =>
+        [...fila].forEach((bit, x) => bit === '1' && px(x, y, 'c-icon')),
+      );
+      let x = 7;
+      for (const ch of ['x', ...String(total)]) {
+        GLIFOS[ch].forEach((fila, y) =>
+          [...fila].forEach((bit, dx) => bit === '1' && px(x + dx, y, 'c-digit')),
+        );
+        x += 4;
+      }
+      counter.innerHTML = rects.join('');
+    };
+
+    const obtener = () => {
+      total += 1;
+      dibujarContador();
+      // Destello suave de los dígitos al sumar
+      counter.classList.remove('is-new');
+      void counter.getBoundingClientRect();
+      counter.classList.add('is-new');
+    };
+
+    // Elige un objeto al azar, distinto del anterior.
+    const elegirObjeto = () => {
+      const opciones = OBJETOS.filter((o) => o !== ultimo);
+      ultimo = opciones[Math.floor(Math.random() * opciones.length)];
+      root.dataset.item = ultimo;
     };
 
     const play = () => {
-      if (motion.matches) return;
+      clearTimeout(timer);
+      elegirObjeto();
+      if (motion.matches) {
+        // Sin movimiento: el objeto aparece directo en su lugar.
+        obtener();
+        return;
+      }
       root.classList.remove('is-playing');
       void root.offsetWidth; // fuerza un reflow para reiniciar las animaciones CSS
       root.classList.add('is-playing');
+      timer = window.setTimeout(obtener, SALIDA_MS);
     };
 
     const sync = () => {
@@ -300,8 +440,12 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
     fit();
     new ResizeObserver(fit).observe(svg);
     button?.addEventListener('click', play);
+    // Botón nativo: ya responde a clic, Enter y Espacio.
+    blockHit.hidden = false;
+    blockHit.addEventListener('click', play);
     motion.addEventListener('change', sync);
     sync();
+    dibujarContador();
     play();
   });
 </script>
@@ -360,6 +504,45 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
   .forest-far .t-rim,
   .forest-far .t-led { display: none; }
   .forest-near { opacity: 0.85; }
+
+  /* Objetos: se muestra solo el elegido (sin JS, la brasa) */
+  .item { display: none; }
+  .pixel-scene:not([data-item]) .item-brasa,
+  .pixel-scene[data-item='brasa'] .item-brasa,
+  .pixel-scene[data-item='moneda'] .item-moneda,
+  .pixel-scene[data-item='engranaje'] .item-engranaje,
+  .pixel-scene[data-item='chip'] .item-chip,
+  .pixel-scene[data-item='vela'] .item-vela {
+    display: inline;
+  }
+
+  /* Contador pixelado (los rects los crea JS: :global evita el scoping) */
+  .counter :global(.c-icon) { fill: var(--accent); }
+  .counter :global(.c-digit) { fill: var(--text-muted); }
+  .counter.is-new :global(.c-digit) { animation: counter-new 0.9s ease-out; }
+  @keyframes counter-new {
+    from { fill: var(--accent-light); }
+    to { fill: var(--text-muted); }
+  }
+
+  /* Botón invisible sobre el bloque: hover o foco = el bloque da un saltito */
+  .block-hit {
+    position: absolute;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .block-hit[hidden] { display: none; }
+  .pixel-scene:has(.block-hit:hover) .block-hop,
+  .pixel-scene:has(.block-hit:focus-visible) .block-hop {
+    animation: block-hop 0.35s ease-out;
+  }
+  @keyframes block-hop {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-3px); }
+  }
 
   /* ---------- Estado final (por defecto) ----------
      El robot ya se fue y la brasa queda levitando sobre el bloque. */
