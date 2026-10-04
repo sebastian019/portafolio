@@ -1,0 +1,27 @@
+---
+import { perfil } from '../data/perfil';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container inner">
+    <p>© {year} {perfil.nombre}</p>
+    <p>Hecho con Astro · Valparaíso, Chile</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--border);
+    margin-top: var(--section-gap);
+  }
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 2rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+</style>

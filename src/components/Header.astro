@@ -1,0 +1,76 @@
+---
+// Encabezado fijo con navegación a las secciones de la portada.
+import { url } from '../utils/url';
+
+const links = [
+  { href: url('/#proyectos'), label: 'Proyectos' },
+  { href: url('/#sobre-mi'), label: 'Sobre mí' },
+  { href: url('/#experiencia'), label: 'Experiencia' },
+  { href: url('/#contacto'), label: 'Contacto' },
+];
+---
+
+<header class="site-header">
+  <div class="container inner">
+    <a href={url('/')} class="brand" aria-label="Inicio">
+      S<span>.</span>G
+    </a>
+    <nav aria-label="Principal">
+      <ul>
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(20, 17, 16, 0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid transparent;
+  }
+  .inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 4rem;
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .brand span {
+    color: var(--accent);
+  }
+  ul {
+    display: flex;
+    gap: clamp(0.9rem, 3vw, 2rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  nav a:hover {
+    color: var(--text);
+  }
+  /* En pantallas muy angostas se ocultan los enlaces secundarios */
+  @media (max-width: 30rem) {
+    li:nth-child(2),
+    li:nth-child(3) {
+      display: none;
+    }
+  }
+</style>

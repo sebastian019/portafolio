@@ -1,0 +1,55 @@
+---
+import { perfil } from '../data/perfil';
+---
+
+<section class="hero container" aria-labelledby="hero-nombre">
+  <p class="eyebrow reveal">Portafolio · Ingeniería Civil Informática</p>
+  <h1 id="hero-nombre" class="reveal">{perfil.nombre}</h1>
+  <p class="lead reveal">
+    {perfil.titular}. {perfil.bajada}
+  </p>
+  <div class="actions reveal">
+    <a href="#proyectos" class="btn btn-primary">Ver proyectos</a>
+    <a href="#contacto" class="btn btn-ghost">Contacto</a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-height: calc(88svh - 4rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: 4rem;
+  }
+  .eyebrow {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    font-size: clamp(2.75rem, 11vw, 6rem);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    max-width: 14ch;
+  }
+  .lead {
+    margin-top: 1.75rem;
+    max-width: 36rem;
+    font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+    color: var(--text-muted);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+  }
+  /* Escalonado sutil de la entrada */
+  .reveal:nth-child(2) { transition-delay: 0.08s; }
+  .reveal:nth-child(3) { transition-delay: 0.16s; }
+  .reveal:nth-child(4) { transition-delay: 0.24s; }
+</style>

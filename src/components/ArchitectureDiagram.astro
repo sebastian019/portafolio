@@ -1,0 +1,144 @@
+---
+// Diagrama simple de la arquitectura del sistema multiagente (SVG inline).
+// Solo muestra lo confirmado: datos de mercado -> agentes que colaboran ->
+// apoyo a la decisión -> orden simulada en Alpaca (paper trading).
+// TODO (Sebastián): definir cuántos agentes hay y el rol de cada uno;
+// basta con editar el arreglo `agentes`.
+const agentes = [
+  { nombre: 'Agente 1', rol: 'TODO: rol' },
+  { nombre: 'Agente 2', rol: 'TODO: rol' },
+  { nombre: 'Agente 3', rol: 'TODO: rol' },
+];
+
+// Geometría: diseño vertical y angosto (viewBox 560 de ancho) para que el
+// texto siga legible en celulares; el SVG escala solo.
+const W = 560;
+const agenteH = 64;
+const gap = 16;
+const agentesTop = 140;
+const agentesAlto = agentes.length * agenteH + (agentes.length - 1) * gap;
+const salidaY = agentesTop + agentesAlto + 56;
+const alpacaY = salidaY + 120;
+const H = alpacaY + 90;
+---
+
+<figure class="diagram">
+  <svg
+    viewBox={`0 0 ${W} ${H}`}
+    role="img"
+    aria-labelledby="diag-title diag-desc"
+  >
+    <title id="diag-title">Arquitectura del sistema de trading con agentes de IA</title>
+    <desc id="diag-desc">
+      Los datos de mercado llegan a varios agentes de IA, que colaboran para apoyar la
+      decisión de trading. La decisión resultante se ejecuta como orden simulada en Alpaca
+      (paper trading), sin dinero real. Los roles de los agentes están por definir.
+    </desc>
+
+    <defs>
+      <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" class="arrow-head" />
+      </marker>
+    </defs>
+
+    <!-- Entrada: datos de mercado -->
+    <rect x="130" y="20" width="300" height="60" rx="12" class="box" />
+    <text x={W / 2} y="57" class="label">Datos de mercado</text>
+    <line x1={W / 2} y1="80" x2={W / 2} y2={agentesTop - 36} class="edge" marker-end="url(#flecha)" />
+
+    <!-- Grupo de agentes que colaboran -->
+    <rect x="30" y={agentesTop - 30} width={W - 60} height={agentesAlto + 50} rx="16" class="group" />
+    <text x="50" y={agentesTop - 6} class="group-label">Agentes de IA (colaboran entre sí)</text>
+    {agentes.map((a, i) => {
+      const y = agentesTop + 10 + i * (agenteH + gap);
+      return (
+        <g>
+          <rect x="60" y={y} width={W - 120} height={agenteH - 10} rx="10" class="box" />
+          <text x="84" y={y + 34} class="label-left">
+            <tspan class="accent">{a.nombre}</tspan>
+            <tspan dx="14" class="muted">{a.rol}</tspan>
+          </text>
+        </g>
+      );
+    })}
+
+    <line x1={W / 2} y1={agentesTop + agentesAlto + 20} x2={W / 2} y2={salidaY - 4} class="edge" marker-end="url(#flecha)" />
+
+    <!-- Salida: apoyo a la decisión y orden simulada -->
+    <rect x="130" y={salidaY} width="300" height="60" rx="12" class="box" />
+    <text x={W / 2} y={salidaY + 37} class="label">Apoyo a la decisión</text>
+    <line x1={W / 2} y1={salidaY + 60} x2={W / 2} y2={alpacaY - 4} class="edge" marker-end="url(#flecha)" />
+    <rect x="100" y={alpacaY} width="360" height="74" rx="12" class="box box-accent" />
+    <text x={W / 2} y={alpacaY + 32} class="label">Alpaca · paper trading</text>
+    <text x={W / 2} y={alpacaY + 56} class="small">orden simulada, sin dinero real</text>
+  </svg>
+  <figcaption>
+    Diagrama simplificado. Los roles de cada agente y cómo se coordinan están pendientes de documentar.
+  </figcaption>
+</figure>
+
+<style>
+  .diagram {
+    margin: 2rem 0;
+    padding: clamp(1rem, 3vw, 2rem);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  svg {
+    width: 100%;
+    max-width: 36rem;
+    margin-inline: auto;
+    height: auto;
+    font-family: var(--font-body);
+  }
+  .box {
+    fill: var(--bg);
+    stroke: var(--border);
+    stroke-width: 1.5;
+  }
+  .box-accent {
+    stroke: var(--accent);
+  }
+  .group {
+    fill: none;
+    stroke: var(--border);
+    stroke-dasharray: 5 6;
+  }
+  .group-label {
+    fill: var(--text-muted);
+    font-size: 17px;
+  }
+  .label,
+  .label-left {
+    fill: var(--text);
+    font-size: 22px;
+  }
+  .label,
+  .small {
+    text-anchor: middle;
+  }
+  .small {
+    fill: var(--text-muted);
+    font-size: 17px;
+  }
+  .accent {
+    fill: var(--accent);
+  }
+  .muted {
+    fill: var(--text-muted);
+    font-style: italic;
+  }
+  .edge {
+    stroke: var(--text-muted);
+    stroke-width: 1.5;
+  }
+  .arrow-head {
+    fill: var(--text-muted);
+  }
+  figcaption {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+</style>

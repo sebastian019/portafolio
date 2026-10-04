@@ -1,0 +1,63 @@
+---
+interface Props {
+  cargo: string;
+  organizacion: string;
+  periodo: string;
+  resumen: string;
+  puntos: string[];
+}
+const { cargo, organizacion, periodo, resumen, puntos } = Astro.props;
+---
+
+<article class="item reveal">
+  <p class="periodo">{periodo}</p>
+  <div>
+    <h3>{cargo} · <span>{organizacion}</span></h3>
+    <p class="resumen">{resumen}</p>
+    <ul>
+      {puntos.map((p) => <li>{p}</li>)}
+    </ul>
+  </div>
+</article>
+
+<style>
+  .item {
+    display: grid;
+    gap: 0.75rem;
+    padding-block: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  @media (min-width: 48rem) {
+    .item {
+      grid-template-columns: 11rem 1fr;
+      gap: 2rem;
+    }
+  }
+  .periodo {
+    font-size: 0.9rem;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.3rem;
+  }
+  h3 {
+    font-size: 1.4rem;
+  }
+  h3 span {
+    color: var(--text-muted);
+  }
+  .resumen {
+    margin-top: 0.5rem;
+  }
+  ul {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
+    color: var(--text-muted);
+    max-width: var(--reading);
+  }
+  li + li {
+    margin-top: 0.4rem;
+  }
+  li::marker {
+    color: var(--accent);
+  }
+</style>

@@ -1,0 +1,13 @@
+# Secretos: NUNCA subir claves al repositorio
+.env
+.env.*
+!.env.example
+
+# Dependencias y builds
+node_modules/
+dist/
+.astro/
+
+# Sistema
+.DS_Store
+Thumbs.db

@@ -1,0 +1,158 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import ExperienceItem from '../components/ExperienceItem.astro';
+import { perfil } from '../data/perfil';
+import { url } from '../utils/url';
+
+// Proyectos ordenados por "orden" (y luego por fecha, más reciente primero).
+const proyectos = (await getCollection('proyectos')).sort(
+  (a, b) => a.data.orden - b.data.orden || b.data.inicio.getTime() - a.data.inicio.getTime(),
+);
+
+const { correo, github, linkedin, cv } = perfil.enlaces;
+const contactos = [
+  { etiqueta: 'Correo', valor: correo, href: correo ? `mailto:${correo}` : null },
+  { etiqueta: 'GitHub', valor: github?.replace('https://', ''), href: github },
+  { etiqueta: 'LinkedIn', valor: linkedin?.replace('https://', ''), href: linkedin },
+  { etiqueta: 'CV', valor: cv ? 'Descargar PDF' : null, href: cv ? url(cv) : null },
+];
+---
+
+<BaseLayout>
+  <Hero />
+
+  <Section id="proyectos" numero="01" titulo="Proyectos">
+    <div class="projects">
+      {proyectos.map((p, i) => <ProjectCard proyecto={p} indice={i} />)}
+    </div>
+  </Section>
+
+  <Section id="sobre-mi" numero="02" titulo="Sobre mí">
+    <div class="about reveal">
+      {perfil.sobreMi.map((parrafo) => <p>{parrafo}</p>)}
+    </div>
+  </Section>
+
+  <Section id="experiencia" numero="03" titulo="Experiencia">
+    {perfil.experiencia.map((e) => <ExperienceItem {...e} />)}
+  </Section>
+
+  <Section id="aptitudes" numero="04" titulo="Aptitudes">
+    <div class="skills">
+      {perfil.aptitudes.map((g) => (
+        <div class="skill-group reveal">
+          <h3>{g.grupo}</h3>
+          <ul class="tags">
+            {g.items.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      ))}
+      <div class="skill-group reveal">
+        <h3>Idiomas</h3>
+        <ul class="langs">
+          {perfil.idiomas.map((l) => (
+            <li><span>{l.idioma}</span> {l.nivel}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </Section>
+
+  <Section id="contacto" numero="05" titulo="Contacto">
+    <p class="contact-lead reveal">
+      Estoy buscando práctica profesional. Si te interesa conversar, escríbeme.
+    </p>
+    <ul class="contact reveal">
+      {contactos.map((c) => (
+        <li>
+          <span class="c-label">{c.etiqueta}</span>
+          {c.href ? (
+            <a href={c.href} {...(c.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+              {c.valor}
+            </a>
+          ) : (
+            <span class="todo">Pendiente</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </Section>
+</BaseLayout>
+
+<style>
+  .projects {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .about {
+    max-width: var(--reading);
+    font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  }
+  .about p + p {
+    margin-top: 1.25rem;
+  }
+  .about p:not(:first-child) {
+    color: var(--text-muted);
+  }
+  .skills {
+    display: grid;
+    gap: 2.5rem;
+  }
+  @media (min-width: 48rem) {
+    .skills {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3rem 4rem;
+    }
+  }
+  .skill-group h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .langs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: var(--text-muted);
+  }
+  .langs li + li {
+    margin-top: 0.5rem;
+  }
+  .langs span {
+    color: var(--text);
+    margin-right: 0.5rem;
+  }
+  .contact-lead {
+    max-width: var(--reading);
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    line-height: 1.3;
+  }
+  .contact {
+    list-style: none;
+    padding: 0;
+    margin: 2.5rem 0 0;
+    max-width: var(--reading);
+  }
+  .contact li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding-block: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .contact li:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+  .c-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .contact a {
+    overflow-wrap: anywhere;
+  }
+</style>

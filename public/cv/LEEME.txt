@@ -1,0 +1,2 @@
+TODO: coloca aquí tu CV en PDF (por ejemplo cv-sebastian-gatica.pdf)
+y actualiza la ruta en src/data/perfil.ts (enlaces.cv).

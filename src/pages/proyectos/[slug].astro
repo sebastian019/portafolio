@@ -1,0 +1,20 @@
+---
+// Genera una página por cada proyecto de la colección.
+import { getCollection, render } from 'astro:content';
+import CaseStudyLayout from '../../layouts/CaseStudyLayout.astro';
+
+export async function getStaticPaths() {
+  const proyectos = await getCollection('proyectos');
+  return proyectos.map((proyecto) => ({
+    params: { slug: proyecto.id },
+    props: { proyecto },
+  }));
+}
+
+const { proyecto } = Astro.props;
+const { Content } = await render(proyecto);
+---
+
+<CaseStudyLayout proyecto={proyecto}>
+  <Content />
+</CaseStudyLayout>
