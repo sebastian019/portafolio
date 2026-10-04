@@ -12,6 +12,14 @@
   --text-muted: #a39a92;
   --accent: #f28c38;
   --accent-soft: rgba(242, 140, 56, 0.14);
+  /* Matices del acento (fondo decorativo y pixel art de la portada) */
+  --accent-light: #ffb36b;
+  --accent-deep: #c4651f;
+  --ember-core: #fff1dd;
+  /* Grises cálidos del robot de la portada */
+  --steel-1: #8e7a6c;
+  --steel-2: #6a584c;
+  --steel-3: #463a33;
 
   /* Tipografía */
   --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;

@@ -22,6 +22,8 @@ npm run preview   # sirve dist/ para revisarlo antes de publicar
 | Esquema del frontmatter de proyectos | `src/content.config.ts` |
 | Diagrama de arquitectura del seminario (roles de agentes) | `src/components/ArchitectureDiagram.astro` |
 | Colores, tipografía y espaciado | `src/styles/global.css` (variables en `:root`) |
+| Fondo decorativo (degradados, puntos, formas) | `src/components/BackgroundDecor.astro` |
+| Animación pixel art de la portada (sprites como texto) | `src/components/PixelScene.astro` |
 
 ## Agregar un proyecto
 

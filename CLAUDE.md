@@ -10,7 +10,7 @@ Vas a construir mi portafolio web como informático. Trabajamos por etapas: la e
 - Experiencia: práctica en el Instituto de Investigación y Control (IDIC), ene-feb 2025. Prototipo local de protección de documentos: comparé alternativas de cifrado midiendo tiempos de encriptado/desencriptado, implementé marcas de agua (quién abrió y quién guardó un documento) y control de acceso por niveles de permiso con usuarios de prueba cargados desde un CSV. Todo en entorno local.
 - Herramientas: Python, SQL, GitHub, Excel, Ollama, Claude, Gemini, NotebookLM, Alpaca (paper trading).
 - Idiomas: español nativo; inglés en progreso (preparando Cambridge B1 Preliminary, beca PUCV).
-- Enlaces: GitHub https://github.com/sebastian019 · Correo sebastian.gatica2004@gmail.com · LinkedIn: TODO (URL del perfil, pendiente) · CV en PDF: TODO.
+- Enlaces: GitHub https://github.com/sebastian019?tab=repositories · Correo sebastian.gatica2004@gmail.com · LinkedIn https://www.linkedin.com/in/sebastián-gatica-leiva-b97296441 · CV en PDF: TODO.
 
 ## Primer proyecto (caso de estudio destacado)
 "Sistema de trading con agentes de IA" (seminario de título, en desarrollo desde ago. 2026): sistema multiagente en el que distintos agentes de IA analizan datos de mercado y colaboran para apoyar la toma de decisiones de trading. Se prueba en paper trading con Alpaca, SIN dinero real. Surge de mi interés por el sector financiero.

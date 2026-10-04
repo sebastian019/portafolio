@@ -1,0 +1,160 @@
+---
+// Fondo decorativo fijo detrás de todo el contenido. Solo CSS y SVG inline
+// (sin imágenes): degradados cálidos, una trama de puntos naranja muy tenue,
+// unos "píxeles" sueltos y formas geométricas suaves que derivan lentamente.
+// Es puramente decorativo: aria-hidden y sin eventos de puntero.
+---
+
+<div class="bg-decor" aria-hidden="true">
+  <div class="glow"></div>
+  <div class="dots"></div>
+
+  <!-- Formas geométricas: trazos finos, opacidad muy baja -->
+  <svg class="shape ring" viewBox="0 0 200 200" fill="none">
+    <circle cx="100" cy="100" r="96" stroke="currentColor" stroke-width="1" />
+    <circle cx="100" cy="100" r="70" stroke="currentColor" stroke-width="0.6" stroke-dasharray="2 6" />
+  </svg>
+
+  <svg class="shape square" viewBox="0 0 100 100" fill="none">
+    <rect x="10" y="10" width="80" height="80" rx="6" stroke="currentColor" stroke-width="1" />
+  </svg>
+
+  <svg class="shape arc" viewBox="0 0 200 100" fill="none">
+    <path d="M4 100a96 96 0 0 1 192 0" stroke="currentColor" stroke-width="1" />
+  </svg>
+
+  <svg class="shape plus" viewBox="0 0 20 20" fill="none">
+    <path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+  </svg>
+
+  <!-- Grupos de píxeles sueltos, como una constelación -->
+  <svg class="shape pixels pixels-a" viewBox="0 0 48 32" shape-rendering="crispEdges">
+    <rect x="0" y="8" width="4" height="4" />
+    <rect x="8" y="0" width="4" height="4" opacity="0.6" />
+    <rect x="16" y="16" width="4" height="4" opacity="0.8" />
+    <rect x="28" y="8" width="4" height="4" opacity="0.4" />
+    <rect x="40" y="24" width="4" height="4" opacity="0.7" />
+  </svg>
+
+  <svg class="shape pixels pixels-b" viewBox="0 0 40 40" shape-rendering="crispEdges">
+    <rect x="0" y="0" width="4" height="4" opacity="0.5" />
+    <rect x="4" y="4" width="4" height="4" />
+    <rect x="20" y="12" width="4" height="4" opacity="0.6" />
+    <rect x="12" y="28" width="4" height="4" opacity="0.8" />
+    <rect x="32" y="36" width="4" height="4" opacity="0.4" />
+  </svg>
+</div>
+
+<style>
+  .bg-decor {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    color: var(--accent);
+  }
+
+  /* Degradados cálidos sobre el casi negro */
+  .glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60rem 40rem at 85% -10%, rgba(242, 140, 56, 0.09), transparent 60%),
+      radial-gradient(50rem 36rem at -10% 110%, rgba(196, 101, 31, 0.08), transparent 60%),
+      radial-gradient(40rem 30rem at 50% 50%, rgba(60, 40, 30, 0.25), transparent 70%);
+  }
+
+  /* Trama de puntos: un punto de 1px cada 28px, desvanecida hacia el centro
+     para que nunca compita con el texto. */
+  .dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(242, 140, 56, 0.16) 1px, transparent 1.4px);
+    background-size: 28px 28px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, transparent 35%, #000 100%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, transparent 35%, #000 100%);
+  }
+
+  .shape {
+    position: absolute;
+    max-width: none;
+    animation: drift 28s ease-in-out infinite alternate;
+  }
+
+  .ring {
+    width: clamp(16rem, 45vw, 34rem);
+    top: -6rem;
+    right: -8rem;
+    opacity: 0.1;
+  }
+  .square {
+    width: clamp(5rem, 12vw, 9rem);
+    bottom: 14%;
+    right: 8%;
+    opacity: 0.07;
+    rotate: 14deg;
+    animation-duration: 34s;
+    animation-delay: -8s;
+  }
+  .arc {
+    width: clamp(14rem, 36vw, 28rem);
+    bottom: -2rem;
+    left: -4rem;
+    opacity: 0.08;
+    animation-duration: 40s;
+    animation-delay: -16s;
+  }
+  .plus {
+    width: 1.1rem;
+    top: 38%;
+    left: 6%;
+    opacity: 0.25;
+    animation-duration: 22s;
+  }
+  .pixels {
+    fill: var(--accent);
+    opacity: 0.16;
+    animation-duration: 30s;
+  }
+  .pixels-a {
+    width: 3rem;
+    top: 22%;
+    right: 12%;
+  }
+  .pixels-b {
+    width: 2.5rem;
+    bottom: 30%;
+    left: 10%;
+    animation-delay: -12s;
+  }
+
+  /* En celular se quitan las formas que quedarían detrás del texto */
+  @media (max-width: 40rem) {
+    .square,
+    .plus,
+    .pixels-b {
+      display: none;
+    }
+    .pixels-a {
+      top: 12%;
+      right: 6%;
+    }
+  }
+
+  /* Deriva muy lenta: unos pocos píxeles, casi imperceptible */
+  @keyframes drift {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(12px, -18px, 0) rotate(4deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shape {
+      animation: none;
+    }
+  }
+</style>

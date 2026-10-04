@@ -39,11 +39,36 @@ export const perfil = {
     { idioma: 'Inglés', nivel: 'En progreso — preparando Cambridge B1 Preliminary (beca PUCV)' },
   ],
 
-  // Los enlaces en null se muestran como "pendiente" y no son clicables.
   enlaces: {
-    correo: 'sebastian.gatica2004@gmail.com' as string | null,
-    github: 'https://github.com/sebastian019' as string | null,
-    linkedin: null as string | null, // TODO: URL de LinkedIn
-    cv: null as string | null, // TODO: p. ej. '/cv/cv-sebastian-gatica.pdf'
+    correo: 'sebastian.gatica2004@gmail.com',
+    github: 'https://github.com/sebastian019?tab=repositories',
+    linkedin: 'https://www.linkedin.com/in/sebastián-gatica-leiva-b97296441',
+    // TODO (solo en código, no se muestra en la página): agregar el CV en PDF
+    // en public/cv/ y sumarlo a `contactos` más abajo.
   },
 };
+
+// Enlaces de contacto listos para mostrar (sección Contacto y pie de página).
+// `externo: true` => se abre en pestaña nueva con rel="noopener".
+// El correo (mailto:) no se abre en pestaña nueva: lo maneja el cliente de correo.
+export const contactos = [
+  {
+    etiqueta: 'Correo',
+    texto: perfil.enlaces.correo,
+    href: `mailto:${perfil.enlaces.correo}`,
+    externo: false,
+  },
+  {
+    etiqueta: 'GitHub',
+    texto: 'github.com/sebastian019',
+    href: perfil.enlaces.github,
+    externo: true,
+  },
+  {
+    etiqueta: 'LinkedIn',
+    texto: 'linkedin.com/in/sebastián-gatica-leiva',
+    // encodeURI convierte la "á" a %C3%A1 para que el href sea una URL válida.
+    href: encodeURI(perfil.enlaces.linkedin),
+    externo: true,
+  },
+];

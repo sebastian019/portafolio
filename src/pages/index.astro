@@ -5,21 +5,12 @@ import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import ExperienceItem from '../components/ExperienceItem.astro';
-import { perfil } from '../data/perfil';
-import { url } from '../utils/url';
+import { perfil, contactos } from '../data/perfil';
 
 // Proyectos ordenados por "orden" (y luego por fecha, más reciente primero).
 const proyectos = (await getCollection('proyectos')).sort(
   (a, b) => a.data.orden - b.data.orden || b.data.inicio.getTime() - a.data.inicio.getTime(),
 );
-
-const { correo, github, linkedin, cv } = perfil.enlaces;
-const contactos = [
-  { etiqueta: 'Correo', valor: correo, href: correo ? `mailto:${correo}` : null },
-  { etiqueta: 'GitHub', valor: github?.replace('https://', ''), href: github },
-  { etiqueta: 'LinkedIn', valor: linkedin?.replace('https://', ''), href: linkedin },
-  { etiqueta: 'CV', valor: cv ? 'Descargar PDF' : null, href: cv ? url(cv) : null },
-];
 ---
 
 <BaseLayout>
@@ -70,13 +61,10 @@ const contactos = [
       {contactos.map((c) => (
         <li>
           <span class="c-label">{c.etiqueta}</span>
-          {c.href ? (
-            <a href={c.href} {...(c.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-              {c.valor}
-            </a>
-          ) : (
-            <span class="todo">Pendiente</span>
-          )}
+          <a href={c.href} {...(c.externo ? { target: '_blank', rel: 'noopener' } : {})}>
+            {c.texto}
+            {c.externo && <span class="sr-only"> (se abre en una pestaña nueva)</span>}
+          </a>
         </li>
       ))}
     </ul>
