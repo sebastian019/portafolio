@@ -221,6 +221,39 @@ const bosqueCercano = bosque(21, [20, 36], [16, 28], true);
 
 // Suelo: textura de píxeles sueltos bajo la línea
 const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 3) * 2 }));
+
+// Estrellas: píxeles sueltos y algunas en cruz. Cada una con un ritmo de
+// titileo distinto (t1–t3) y un desfase, para que nunca titilen a la vez.
+const estrellas = (() => {
+  const rand = rng(42);
+  const out: { x: number; y: number; cruz: boolean; ritmo: number; desfase: number; naranja: boolean }[] = [];
+  while (out.length < 46) {
+    const x = Math.floor(rand() * MAX_COLS);
+    const y = 2 + Math.floor(rand() * 20);
+    if (x < 26 && y < 11) continue; // deja libre la esquina del contador
+    out.push({
+      x,
+      y,
+      cruz: rand() < 0.15,
+      ritmo: 1 + Math.floor(rand() * 3),
+      desfase: -Math.round(rand() * 90) / 10,
+      naranja: rand() < 0.3,
+    });
+  }
+  return out;
+})();
+
+// Mini bot dormido (7 × 6). Los ojos van aparte para poder abrir uno.
+const miniBot = sprite([
+  '...t...',
+  '.hhhhh.',
+  '.hvvvh.',
+  '.bbbbb.',
+  'sbbbbbs',
+  '.s...s.',
+], 0, SUELO - 6);
+// Letra "z" de 4 × 4 para los ronquidos (en 3 × 3 se confunde con una "I")
+const zeta = sprite(['llll', '..l.', '.l..', 'llll']);
 ---
 
 <div class="pixel-scene" data-pixel-scene>
@@ -246,6 +279,21 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
     <!-- Resplandor del horizonte -->
     <rect x="0" y="20" width={MAX_COLS} height={SUELO - 20} fill="url(#horizonte)" />
 
+    <!-- Estrellas (detrás de las montañas) -->
+    <g class="stars">
+      {estrellas.map((e) => (
+        <g
+          class={`star t${e.ritmo} ${e.naranja ? 'star-orange' : 'star-warm'}`}
+          style={`animation-delay: ${e.desfase}s`}
+        >
+          <rect x={e.x} y={e.y} width="1" height="1" />
+          {e.cruz && (
+            <path class="star-rays" d={`M${e.x - 1} ${e.y}h1v1h-1zM${e.x + 1} ${e.y}h1v1h-1zM${e.x} ${e.y - 1}h1v1h-1zM${e.x} ${e.y + 1}h1v1h-1z`} />
+          )}
+        </g>
+      ))}
+    </g>
+
     <!-- Montañas: dos cordilleras con cresta de neón tenue -->
     <g class="mountains mountains-far">
       <path class="m-body" d={montesLejanos.silueta} />
@@ -270,6 +318,14 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
 
     <!-- Bloque y objeto: JS los mueve en X según el ancho disponible -->
     <g class="poi" transform="translate(154 0)" data-poi>
+      <!-- Luz del objeto sobre el suelo: franjas pixeladas que se aclaran al centro -->
+      <g class="ground-light">
+        <rect x="-6" y={SUELO} width="24" height="1" opacity="0.25" />
+        <rect x="-2" y={SUELO} width="16" height="1" opacity="0.45" />
+        <rect x="2" y={SUELO} width="8" height="1" opacity="0.8" />
+        <rect x="0" y={SUELO + 2} width="12" height="1" opacity="0.15" />
+        <rect x="-3" y={SUELO - 1} width="18" height="1" opacity="0.08" />
+      </g>
       <!-- El objeto va antes que el bloque para quedar "dentro" de él al inicio.
            Se dibujan los cinco y CSS muestra solo el elegido (data-item). -->
       <g class="ember">
@@ -304,6 +360,25 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
       </g>
     </g>
 
+    <!-- Mini bot que se queda dormido en el borde derecho cuando el robot se va -->
+    <g class="minibot" transform="translate(308 0)" data-minibot>
+      <g class="minibot-body">
+        {miniBot.map((p) => <rect class={`px-${p.c}`} x={p.x} y={p.y} width={p.w} height="1" />)}
+        <!-- Ojos cerrados (párpados) y un ojo que se abre con el cursor -->
+        <rect class="eye-closed" x="2" y={SUELO - 4} width="1" height="1" />
+        <rect class="eye-closed eye-right" x="4" y={SUELO - 4} width="1" height="1" />
+        <rect class="eye-open" x="4" y={SUELO - 4} width="1" height="1" />
+      </g>
+      <g class="zz">
+        <g class="z z-1" transform={`translate(-3 ${SUELO - 11})`}>
+          {zeta.map((p) => <rect x={p.x} y={p.y} width={p.w} height="1" />)}
+        </g>
+        <g class="z z-2" transform={`translate(-3 ${SUELO - 11})`}>
+          {zeta.map((p) => <rect x={p.x} y={p.y} width={p.w} height="1" />)}
+        </g>
+      </g>
+    </g>
+
     <!-- Contador de objetos (lo dibuja JS con dígitos de 3 × 5 px) -->
     <g class="counter" transform="translate(3 3)" data-counter></g>
   </svg>
@@ -317,6 +392,9 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
     aria-label="Golpear el bloque: sale un objeto nuevo"
     title="Golpear el bloque"
   ></button>
+
+  <!-- Zona de hover del mini bot (solo decorativa: abre un ojo) -->
+  <span class="minibot-hit" data-minibot-hit aria-hidden="true"></span>
 
   <button type="button" class="replay" data-replay hidden aria-label="Repetir animación" title="Repetir animación">
     <Icon name="replay" size={14} />
@@ -351,6 +429,8 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
     const counter = root.querySelector<SVGGElement>('[data-counter]')!;
     const button = root.querySelector<HTMLButtonElement>('[data-replay]');
     const blockHit = root.querySelector<HTMLButtonElement>('[data-block-hit]')!;
+    const miniBot = root.querySelector<SVGGElement>('[data-minibot]')!;
+    const miniBotHit = root.querySelector<HTMLElement>('[data-minibot-hit]')!;
 
     // El contador vive solo en memoria: no se guarda entre visitas.
     let total = 0;
@@ -380,6 +460,15 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
         width: `${(20 / cols) * 100}%`,
         top: `${(20 / 60) * 100}%`,
         height: `${(20 / 60) * 100}%`,
+      });
+      // Mini bot pegado al borde derecho (7 px de ancho, 3 px de margen)
+      const botX = cols - 10;
+      miniBot.setAttribute('transform', `translate(${botX} 0)`);
+      Object.assign(miniBotHit.style, {
+        left: `${((botX - 3) / cols) * 100}%`,
+        width: `${(13 / cols) * 100}%`,
+        top: `${(42 / 60) * 100}%`,
+        height: `${(15 / 60) * 100}%`,
       });
     };
 
@@ -525,6 +614,38 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
     to { fill: var(--text-muted); }
   }
 
+  /* Estrellas: titileo muy lento y suave (nunca se apagan del todo) */
+  .star-warm { fill: var(--text); }
+  .star-orange { fill: var(--accent-light); }
+  .star { opacity: 0.35; animation: twinkle 7s ease-in-out infinite; }
+  .star.t2 { animation-duration: 9s; }
+  .star.t3 { animation-duration: 11s; }
+  .star-rays { opacity: 0.45; }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Luz del objeto en el suelo (estado final: encendida) */
+  .ground-light { fill: var(--accent); opacity: 0.8; }
+
+  /* Mini bot dormido */
+  .eye-closed { fill: var(--steel-2); }
+  .eye-open { fill: var(--accent); opacity: 0; }
+  .zz { fill: var(--text-muted); }
+  .z { opacity: 0; animation: snore 4s ease-out infinite; }
+  .z-2 { animation-delay: 2s; }
+  @keyframes snore {
+    0% { transform: translate(-3px, 45px); opacity: 0; }
+    20% { opacity: 0.7; }
+    100% { transform: translate(-7px, 35px); opacity: 0; }
+  }
+  /* Zona de hover sobre el mini bot: abre un ojo y deja de roncar */
+  .minibot-hit { position: absolute; }
+  .pixel-scene:has(.minibot-hit:hover) .eye-open { opacity: 1; }
+  .pixel-scene:has(.minibot-hit:hover) .eye-right { opacity: 0; }
+  .pixel-scene:has(.minibot-hit:hover) .zz { visibility: hidden; }
+
   /* Botón invisible sobre el bloque: hover o foco = el bloque da un saltito */
   .block-hit {
     position: absolute;
@@ -572,6 +693,19 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
   }
   .is-playing .spark-1 { animation: spark var(--dur) var(--delay) both; }
   .is-playing .spark-2 { animation: spark var(--dur) calc(var(--delay) + 0.25s) both; }
+  /* El suelo se ilumina cuando sale el objeto */
+  .is-playing .ground-light { animation: ground-light var(--dur) var(--delay) both; }
+  /* El mini bot aparece dormido cuando el robot ya salió de cuadro */
+  .is-playing .minibot { animation: minibot-in var(--dur) var(--delay) both; }
+  @keyframes ground-light {
+    0%, 38.33% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+  }
+  @keyframes minibot-in {
+    0%, 90% { opacity: 0; }
+    100% { opacity: 1; }
+  }
   /* Paso: alterna las piernas 8 veces en cada tramo caminando (0,25 s c/u) */
   .is-playing .legs-a {
     animation:
@@ -667,10 +801,14 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
     display: none;
   }
 
-  /* Movimiento reducido: solo el estado final (brasa quieta), sin botón */
+  /* Movimiento reducido: solo el estado final (objeto quieto), sin botón.
+     Las estrellas quedan fijas y el mini bot muestra una sola "z" quieta. */
   @media (prefers-reduced-motion: reduce) {
     .pixel-scene * {
       animation: none !important;
+    }
+    .z-1 {
+      opacity: 0.6;
     }
     .replay {
       display: none;
