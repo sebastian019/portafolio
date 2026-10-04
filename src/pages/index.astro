@@ -5,12 +5,17 @@ import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import ExperienceItem from '../components/ExperienceItem.astro';
+import Icon from '../components/Icon.astro';
 import { perfil, contactos } from '../data/perfil';
 
 // Proyectos ordenados por "orden" (y luego por fecha, más reciente primero).
 const proyectos = (await getCollection('proyectos')).sort(
   (a, b) => a.data.orden - b.data.orden || b.data.inicio.getTime() - a.data.inicio.getTime(),
 );
+
+// Contacto: el correo se muestra con su icono y texto; el resto, solo icono.
+const correo = contactos.find((c) => !c.externo)!;
+const redes = contactos.filter((c) => c.externo);
 ---
 
 <BaseLayout>
@@ -57,17 +62,28 @@ const proyectos = (await getCollection('proyectos')).sort(
     <p class="contact-lead reveal">
       Estoy buscando práctica profesional. Si te interesa conversar, escríbeme.
     </p>
-    <ul class="contact reveal">
-      {contactos.map((c) => (
-        <li>
-          <span class="c-label">{c.etiqueta}</span>
-          <a href={c.href} {...(c.externo ? { target: '_blank', rel: 'noopener' } : {})}>
-            {c.texto}
-            {c.externo && <span class="sr-only"> (se abre en una pestaña nueva)</span>}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <div class="contact reveal">
+      <a class="mail" href={correo.href}>
+        <Icon name="mail" size={22} />
+        <span>{correo.texto}</span>
+      </a>
+      <ul class="socials">
+        {redes.map((r) => (
+          <li>
+            <a
+              class="icon-link"
+              href={r.href}
+              target="_blank"
+              rel="noopener"
+              aria-label={`${r.etiqueta} (se abre en una pestaña nueva)`}
+              title={r.etiqueta}
+            >
+              <Icon name={r.icono} size={22} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   </Section>
 </BaseLayout>
 
@@ -120,27 +136,43 @@ const proyectos = (await getCollection('proyectos')).sort(
     line-height: 1.3;
   }
   .contact {
-    list-style: none;
-    padding: 0;
-    margin: 2.5rem 0 0;
-    max-width: var(--reading);
-  }
-  .contact li {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0.25rem 1rem;
-    padding-block: 1rem;
-    border-top: 1px solid var(--border);
+    align-items: center;
+    gap: 1.25rem 2rem;
+    margin-top: 2.5rem;
   }
-  .contact li:last-child {
-    border-bottom: 1px solid var(--border);
-  }
-  .c-label {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-  }
-  .contact a {
+  .mail {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: clamp(1rem, 2.6vw, 1.15rem);
     overflow-wrap: anywhere;
+  }
+  .mail :global(.icon) {
+    flex: none;
+  }
+  .socials {
+    display: flex;
+    gap: 0.75rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  /* Botón circular de 44 px: área táctil cómoda en celular */
+  .icon-link {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--text-muted);
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
+  }
+  .icon-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-2px);
   }
 </style>

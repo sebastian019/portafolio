@@ -1,14 +1,15 @@
 ---
 // Escena de pixel art de la portada (personaje original: un pequeño robot).
-// Secuencia única al cargar: entra caminando, salta, golpea el bloque "?",
-// sale una brasa que flota y el robot se va. El estado final queda estático.
+// Secuencia al cargar: entra caminando, salta, golpea el bloque "?", sale una
+// brasa que queda levitando y el robot se va. De fondo, un bosque cyberpunk.
 //
-// Todo es SVG + CSS. JS solo agrega la clase que inicia la animación y
-// maneja el botón "Repetir". Con prefers-reduced-motion (o sin JS) se
-// muestra directamente el estado final.
+// Todo es SVG + CSS. JS ajusta el ancho de la escena al contenedor, agrega la
+// clase que inicia la animación y maneja el botón de repetir. Con
+// prefers-reduced-motion (o sin JS) se muestra directamente el estado final.
 //
 // Los sprites se escriben como cuadrículas de texto: cada carácter es un
 // píxel y "." es transparente. Se convierten a <rect> al compilar.
+import Icon from './Icon.astro';
 
 type Px = { x: number; y: number; w: number; c: string };
 
@@ -28,6 +29,10 @@ function sprite(rows: string[], ox = 0, oy = 0): Px[] {
   return out;
 }
 
+// Ancho máximo de la escena en "píxeles" del dibujo; JS muestra solo lo que cabe.
+const MAX_COLS = 400;
+const SUELO = 56;
+
 // Robot (9 × 12). t: punta de antena · h/b/s: grises cálidos · v: visor · e: ojos · c: luz del pecho
 const robotCuerpo = sprite([
   '....t....',
@@ -46,74 +51,153 @@ const piernasA = sprite(['..ss.ss..', '..hh.hh..'], 0, 10);
 const piernasB = sprite(['..ss.ss..', '.hh...hh.'], 0, 10);
 
 // Bloque (12 × 12) con un "?" pixelado propio. o: borde · d: relleno · r: remaches · q: signo
-const bloque = sprite(
-  [
-    '.oooooooooo.',
-    'oddddddddddo',
-    'odrddddddrdo',
-    'oddddqqddddo',
-    'odddqddqdddo',
-    'oddddddqdddo',
-    'odddddqddddo',
-    'odddddqddddo',
-    'oddddddddddo',
-    'odddddqddddo',
-    'odrddddddrdo',
-    '.oooooooooo.',
-  ],
-  74,
-  24,
-);
+const bloque = sprite([
+  '.oooooooooo.',
+  'oddddddddddo',
+  'odrddddddrdo',
+  'oddddqqddddo',
+  'odddqddqdddo',
+  'oddddddqdddo',
+  'odddddqddddo',
+  'odddddqddddo',
+  'oddddddddddo',
+  'odddddqddddo',
+  'odrddddddrdo',
+  '.oooooooooo.',
+], 0, 24);
 
 // Brasa (5 × 7). y: núcleo · l: claro · a: acento · k: borde oscuro
-const brasa = sprite(
-  [
-    '..l..',
-    '.ala.',
-    '.ala.',
-    'kalak',
-    'kayak',
-    '.kak.',
-    '..k..',
-  ],
-  78,
-  15,
-);
+const brasa = sprite([
+  '..l..',
+  '.ala.',
+  '.ala.',
+  'kalak',
+  'kayak',
+  '.kak.',
+  '..k..',
+], 4, 15);
 
-// Suelo: línea fina con algunos píxeles de textura
-const suelo = Array.from({ length: 20 }, (_, i) => ({ x: i * 8 + (i % 3) * 2, y: 58 }));
+// ---------- Bosque cyberpunk (generado al compilar, siempre igual) ----------
+// Generador pseudoaleatorio con semilla fija: el dibujo no cambia entre builds.
+function rng(seed: number) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+type TreePx = { x: number; y: number; w: number; h: number; c: string };
+
+/** Pino escalonado: silueta oscura con borde de neón en el lado izquierdo. */
+function pino(cx: number, alto: number, rand: () => number): TreePx[] {
+  const px: TreePx[] = [];
+  const copa = alto - 2;
+  const top = SUELO - alto;
+  for (let r = 0; r < copa; r++) {
+    const half = Math.floor((r % 5) / 2) + Math.floor(r / 5);
+    const y = top + r;
+    px.push({ x: cx - half, y, w: half * 2 + 1, h: 1, c: 'leaf' });
+    // Neón solo en el borde inferior de cada escalón (lado izquierdo y derecho)
+    if (r % 5 === 4 || r === copa - 1) {
+      px.push({ x: cx - half, y, w: 1, h: 1, c: 'rim' });
+      px.push({ x: cx + half, y, w: 1, h: 1, c: 'rim' });
+    }
+    if (half > 1 && rand() < 0.12) px.push({ x: cx + Math.round((rand() - 0.5) * half), y, w: 1, h: 1, c: 'led' });
+  }
+  px.push({ x: cx, y: SUELO - 2, w: 1, h: 2, c: 'leaf' }); // tronco
+  return px;
+}
+
+/** Árbol de copa redonda con contorno de neón en la mitad superior. */
+function redondo(cx: number, alto: number, rand: () => number): TreePx[] {
+  const px: TreePx[] = [];
+  const R = Math.max(3, Math.min(7, Math.floor(alto / 3)));
+  const cy = SUELO - alto + R;
+  for (let dy = -R; dy <= R; dy++) {
+    const half = Math.floor(Math.sqrt(R * R - dy * dy) + 0.3);
+    const y = cy + dy;
+    px.push({ x: cx - half, y, w: half * 2 + 1, h: 1, c: 'leaf' });
+    if (dy < 0) {
+      px.push({ x: cx - half, y, w: 1, h: 1, c: 'rim' });
+      px.push({ x: cx + half, y, w: 1, h: 1, c: 'rim' });
+    }
+    if (half > 1 && rand() < 0.15) px.push({ x: cx + Math.round((rand() - 0.5) * half), y, w: 1, h: 1, c: 'led' });
+  }
+  px.push({ x: cx, y: cy + R + 1, w: 1, h: SUELO - cy - R - 1, c: 'leaf' }); // tronco
+  return px;
+}
+
+function bosque(seed: number, paso: [number, number], alto: [number, number], conRedondos: boolean) {
+  const rand = rng(seed);
+  const px: TreePx[] = [];
+  let x = Math.floor(rand() * paso[0]);
+  let i = 0;
+  while (x < MAX_COLS + 10) {
+    const h = alto[0] + Math.floor(rand() * (alto[1] - alto[0]));
+    // Alterna pinos y árboles redondos para que no se agrupen
+    if (conRedondos && i++ % 2 === 1 && rand() < 0.8) px.push(...redondo(x, h, rand));
+    else px.push(...pino(x, h, rand));
+    x += paso[0] + Math.floor(rand() * (paso[1] - paso[0]));
+  }
+  return px;
+}
+
+const bosqueLejano = bosque(7, [9, 16], [12, 20], false);
+const bosqueCercano = bosque(21, [20, 36], [16, 28], true);
+
+// Suelo: textura de píxeles sueltos bajo la línea
+const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 3) * 2 }));
 ---
 
 <div class="pixel-scene" data-pixel-scene>
   <svg
     class="scene"
-    viewBox="0 0 160 60"
+    viewBox={`0 0 320 60`}
     shape-rendering="crispEdges"
     aria-hidden="true"
     focusable="false"
+    data-scene
   >
     <defs>
       <radialGradient id="brasa-glow">
         <stop offset="0" style="stop-color: var(--accent); stop-opacity: 0.55" />
         <stop offset="1" style="stop-color: var(--accent); stop-opacity: 0" />
       </radialGradient>
+      <linearGradient id="horizonte" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color: var(--accent); stop-opacity: 0" />
+        <stop offset="1" style="stop-color: var(--accent); stop-opacity: 0.07" />
+      </linearGradient>
     </defs>
 
-    <!-- Suelo -->
-    <rect class="ground" x="0" y="56" width="160" height="1" />
-    {suelo.map((p) => <rect class="ground-px" x={p.x} y={p.y} width="1" height="1" />)}
+    <!-- Resplandor del horizonte -->
+    <rect x="0" y="20" width={MAX_COLS} height={SUELO - 20} fill="url(#horizonte)" />
 
-    <!-- Brasa: va antes que el bloque para quedar "dentro" de él al inicio -->
-    <g class="ember">
-      <circle class="ember-glow" cx="80" cy="18" r="11" fill="url(#brasa-glow)" />
-      {brasa.map((p) => <rect class={`px-${p.c}`} x={p.x} y={p.y} width={p.w} height="1" />)}
-      <rect class="spark spark-1 px-l" x="76" y="16" width="1" height="1" />
-      <rect class="spark spark-2 px-a" x="84" y="14" width="1" height="1" />
+    <!-- Bosque cyberpunk: dos capas para dar profundidad -->
+    <g class="forest forest-far">
+      {bosqueLejano.map((p) => <rect class={`t-${p.c}`} x={p.x} y={p.y} width={p.w} height={p.h} />)}
+    </g>
+    <g class="forest forest-near">
+      {bosqueCercano.map((p) => <rect class={`t-${p.c}`} x={p.x} y={p.y} width={p.w} height={p.h} />)}
     </g>
 
-    <!-- Bloque -->
-    <g class="block">
-      {bloque.map((p) => <rect class={`px-${p.c}`} x={p.x} y={p.y} width={p.w} height="1" />)}
+    <!-- Suelo -->
+    <rect class="ground" x="0" y={SUELO} width={MAX_COLS} height="1" />
+    {suelo.map((p) => <rect class="ground-px" x={p.x} y="58" width="1" height="1" />)}
+
+    <!-- Bloque y brasa: JS los mueve en X según el ancho disponible -->
+    <g class="poi" transform="translate(74 0)" data-poi>
+      <!-- La brasa va antes que el bloque para quedar "dentro" de él al inicio -->
+      <g class="ember">
+        <circle class="ember-glow" cx="6" cy="18" r="11" fill="url(#brasa-glow)" />
+        {brasa.map((p) => <rect class={`px-${p.c}`} x={p.x} y={p.y} width={p.w} height="1" />)}
+        <rect class="spark spark-1 px-l" x="2" y="16" width="1" height="1" />
+        <rect class="spark spark-2 px-a" x="10" y="14" width="1" height="1" />
+      </g>
+      <g class="block">
+        {bloque.map((p) => <rect class={`px-${p.c}`} x={p.x} y={p.y} width={p.w} height="1" />)}
+      </g>
     </g>
 
     <!-- Robot: un grupo para el eje X (caminar) y otro para el Y (saltar) -->
@@ -132,26 +216,32 @@ const suelo = Array.from({ length: 20 }, (_, i) => ({ x: i * 8 + (i % 3) * 2, y:
     </g>
   </svg>
 
-  <button type="button" class="replay" data-replay hidden>
-    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
-      <path
-        d="M13 8a5 5 0 1 1-1.6-3.7M13 2v3h-3"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"></path>
-    </svg>
-    Repetir animación
+  <button type="button" class="replay" data-replay hidden aria-label="Repetir animación" title="Repetir animación">
+    <Icon name="replay" size={14} />
   </button>
 </div>
 
 <script>
-  // Inicia la secuencia al cargar y permite repetirla.
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   document.querySelectorAll<HTMLElement>('[data-pixel-scene]').forEach((root) => {
+    const svg = root.querySelector<SVGSVGElement>('[data-scene]')!;
+    const poi = root.querySelector<SVGGElement>('[data-poi]')!;
     const button = root.querySelector<HTMLButtonElement>('[data-replay]');
+
+    // Ajusta el dibujo al ancho del contenedor manteniendo píxeles nítidos:
+    // 2 px de pantalla por píxel en celular y 3 en pantallas más anchas.
+    const fit = () => {
+      const width = svg.clientWidth;
+      if (!width) return;
+      const scale = width < 560 ? 2 : 3;
+      const cols = Math.min(400, Math.floor(width / scale));
+      const blockX = Math.round(cols * 0.3);
+      svg.setAttribute('viewBox', `0 0 ${cols} 60`);
+      poi.setAttribute('transform', `translate(${blockX} 0)`);
+      root.style.setProperty('--stop', `${blockX + 2}px`); // robot centrado bajo el bloque
+      root.style.setProperty('--exit', `${cols + 4}px`); // fuera de cuadro
+    };
 
     const play = () => {
       if (motion.matches) return;
@@ -165,6 +255,8 @@ const suelo = Array.from({ length: 20 }, (_, i) => ({ x: i * 8 + (i % 3) * 2, y:
       if (motion.matches) root.classList.remove('is-playing');
     };
 
+    fit();
+    new ResizeObserver(fit).observe(svg);
     button?.addEventListener('click', play);
     motion.addEventListener('change', sync);
     sync();
@@ -176,8 +268,11 @@ const suelo = Array.from({ length: 20 }, (_, i) => ({ x: i * 8 + (i % 3) * 2, y:
   .pixel-scene {
     --dur: 6s;
     --delay: 0.6s;
+    --float: 2.8s;
+    --stop: 76px;
+    --exit: 324px;
+    position: relative;
     margin-top: clamp(2.5rem, 6vw, 3.5rem);
-    max-width: 30rem;
   }
   .scene {
     width: 100%;
@@ -205,22 +300,43 @@ const suelo = Array.from({ length: 20 }, (_, i) => ({ x: i * 8 + (i % 3) * 2, y:
   /* El "?" queda apagado en el estado final (el bloque ya fue usado) */
   .px-q { fill: var(--steel-2); }
 
-  /* ---------- Estado final (por defecto, sin animación) ---------- */
-  .robot-x { transform: translateX(172px); } /* fuera de cuadro */
+  /* Bosque: siluetas oscuras con detalles de neón naranja, siempre tenues */
+  .t-leaf { fill: #2b211c; }
+  .t-rim { fill: var(--accent); opacity: 0.55; }
+  .t-led { fill: var(--accent); opacity: 0.6; }
+  .forest-far { opacity: 0.6; }
+  .forest-far .t-leaf { fill: #221a16; }
+  /* El bosque lejano es solo silueta: el neón queda para la capa cercana */
+  .forest-far .t-rim,
+  .forest-far .t-led { display: none; }
+  .forest-near { opacity: 0.85; }
+
+  /* ---------- Estado final (por defecto) ----------
+     El robot ya se fue y la brasa queda levitando sobre el bloque. */
+  .robot-x { transform: translateX(var(--exit)); }
   .legs-b { opacity: 0; }
   .spark { opacity: 0; }
-  .ember-glow { opacity: 0.4; }
+  .ember { animation: ember-float var(--float) ease-in-out infinite; }
+  .ember-glow { opacity: 0.4; animation: glow-breathe var(--float) ease-in-out infinite; }
 
   /* ---------- Secuencia (solo con la clase .is-playing) ----------
      Línea de tiempo sobre --dur (6 s):
      0–2 s entra caminando · 2–2,7 s salta y golpea · 2,3 s sale la brasa
-     3,4–5,4 s se va caminando · luego todo queda quieto. */
+     3,4–5,4 s se va caminando · después la brasa sigue levitando. */
   .is-playing .robot-x { animation: robot-x var(--dur) var(--delay) both; }
   .is-playing .robot-y { animation: robot-y var(--dur) var(--delay) both; }
   .is-playing .block { animation: block-bump var(--dur) var(--delay) both; }
   .is-playing .px-q { animation: q-off var(--dur) var(--delay) both; }
-  .is-playing .ember { animation: ember var(--dur) var(--delay) both; }
-  .is-playing .ember-glow { animation: ember-glow var(--dur) var(--delay) both; }
+  .is-playing .ember {
+    animation:
+      ember var(--dur) var(--delay) both,
+      ember-float var(--float) ease-in-out calc(var(--delay) + var(--dur)) infinite;
+  }
+  .is-playing .ember-glow {
+    animation:
+      ember-glow var(--dur) var(--delay) both,
+      glow-breathe var(--float) ease-in-out calc(var(--delay) + var(--dur)) infinite;
+  }
   .is-playing .spark-1 { animation: spark var(--dur) var(--delay) both; }
   .is-playing .spark-2 { animation: spark var(--dur) calc(var(--delay) + 0.25s) both; }
   /* Paso: alterna las piernas 8 veces en cada tramo caminando (0,25 s c/u) */
@@ -236,10 +352,10 @@ const suelo = Array.from({ length: 20 }, (_, i) => ({ x: i * 8 + (i % 3) * 2, y:
   }
 
   @keyframes robot-x {
-    0% { transform: translateX(-12px); animation-timing-function: steps(44); }
-    33.33% { transform: translateX(76px); }
-    56.67% { transform: translateX(76px); animation-timing-function: steps(48); }
-    90%, 100% { transform: translateX(172px); }
+    0% { transform: translateX(-12px); animation-timing-function: steps(48); }
+    33.33% { transform: translateX(var(--stop)); }
+    56.67% { transform: translateX(var(--stop)); animation-timing-function: steps(64); }
+    90%, 100% { transform: translateX(var(--exit)); }
   }
   @keyframes robot-y {
     0%, 33.33% { transform: translateY(0); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
@@ -268,6 +384,15 @@ const suelo = Array.from({ length: 20 }, (_, i) => ({ x: i * 8 + (i % 3) * 2, y:
     52% { opacity: 0.85; }
     100% { opacity: 0.4; }
   }
+  /* Levitación infinita y suave de la brasa (y su brillo) */
+  @keyframes ember-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  @keyframes glow-breathe {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.6; }
+  }
   @keyframes spark {
     0%, 45% { transform: translateY(0); opacity: 0; }
     48% { opacity: 1; }
@@ -282,31 +407,33 @@ const suelo = Array.from({ length: 20 }, (_, i) => ({ x: i * 8 + (i % 3) * 2, y:
     50% { opacity: 0; }
   }
 
-  /* Botón discreto para repetir */
+  /* Botón pequeño de repetir, en la esquina superior derecha de la escena */
   .replay {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin-top: 0.75rem;
-    padding: 0.3rem 0.7rem;
-    font: inherit;
-    font-size: 0.8rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
     color: var(--text-muted);
-    background: none;
+    background: rgba(20, 17, 16, 0.6);
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: 50%;
     cursor: pointer;
-    transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.3s var(--ease);
   }
   .replay:hover {
-    color: var(--text);
+    color: var(--accent);
     border-color: var(--accent);
+    transform: rotate(-30deg);
   }
   .replay[hidden] {
     display: none;
   }
 
-  /* Movimiento reducido: solo el estado final, sin botón */
+  /* Movimiento reducido: solo el estado final (brasa quieta), sin botón */
   @media (prefers-reduced-motion: reduce) {
     .pixel-scene * {
       animation: none !important;

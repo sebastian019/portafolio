@@ -54,21 +54,24 @@ export const perfil = {
 export const contactos = [
   {
     etiqueta: 'Correo',
+    icono: 'mail',
     texto: perfil.enlaces.correo,
     href: `mailto:${perfil.enlaces.correo}`,
     externo: false,
   },
   {
     etiqueta: 'GitHub',
+    icono: 'github',
     texto: 'github.com/sebastian019',
     href: perfil.enlaces.github,
     externo: true,
   },
   {
     etiqueta: 'LinkedIn',
+    icono: 'linkedin',
     texto: 'linkedin.com/in/sebastián-gatica-leiva',
     // encodeURI convierte la "á" a %C3%A1 para que el href sea una URL válida.
     href: encodeURI(perfil.enlaces.linkedin),
     externo: true,
   },
-];
+] as const;
