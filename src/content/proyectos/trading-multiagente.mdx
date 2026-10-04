@@ -4,8 +4,10 @@ resumen: Sistema multiagente en el que distintos agentes de IA analizan datos de
 tipo: Seminario de título
 inicio: 2026-08-01
 estado: En desarrollo
-# TODO: agregar las demás tecnologías del proyecto (lenguaje, modelos, frameworks).
+# TODO: agregar las demás tecnologías del proyecto (lenguaje, frameworks).
 tecnologias:
+  - Ollama
+  - Llama 3.1 8B (local)
   - Alpaca (paper trading)
 aviso: Trading simulado. El sistema se prueba con paper trading en Alpaca y no opera con dinero real.
 destacado: true
@@ -25,6 +27,8 @@ Este proyecto es mi seminario de título y está en desarrollo desde agosto de 2
 
 La idea es usar un sistema multiagente: en lugar de un único modelo que lo hace todo, distintos agentes de IA analizan datos de mercado y colaboran entre sí para apoyar la toma de decisiones de trading.
 
+El sistema usa un modelo de lenguaje (LLM) que se ejecuta localmente con Ollama: Llama 3.1 de 8 mil millones de parámetros (`llama3.1:8b`, unos 4,9 GB). Como corre en mi propio equipo, el modelo no depende de un servicio de IA en la nube.
+
 Todas las pruebas se hacen en paper trading con Alpaca, es decir, con operaciones simuladas y sin dinero real.
 
 <Todo>Explicar por qué se eligió un enfoque multiagente y cómo colaboran los agentes.</Todo>
@@ -37,9 +41,11 @@ Todas las pruebas se hacen en paper trading con Alpaca, es decir, con operacione
 
 ## Tecnologías
 
+- **Ollama** — ejecuta el modelo de lenguaje de forma local.
+- **Llama 3.1 8B** (`llama3.1:8b`, ~4,9 GB) — el LLM que usa el sistema, corriendo en local.
 - **Alpaca** — entorno de paper trading para probar el sistema con operaciones simuladas.
 
-<Todo>Agregar lenguaje, modelos de IA, frameworks y librerías que usa el proyecto.</Todo>
+<Todo>Agregar lenguaje, frameworks y librerías que usa el proyecto.</Todo>
 
 ## Estado actual
 

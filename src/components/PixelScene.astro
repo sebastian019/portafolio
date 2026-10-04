@@ -144,6 +144,33 @@ function bosque(seed: number, paso: [number, number], alto: [number, number], co
   return px;
 }
 
+/**
+ * Cordillera pixelada: perfil de alturas con picos triangulares (semilla fija).
+ * Devuelve dos paths: la silueta en escalera y la cresta (1 px por columna).
+ */
+function cordillera(seed: number, picos: number, alto: [number, number], pendiente: [number, number]) {
+  const rand = rng(seed);
+  const cimas = Array.from({ length: picos }, () => ({
+    x: rand() * MAX_COLS,
+    y: alto[0] + rand() * (alto[1] - alto[0]), // y de la cima (menor = más alta)
+    m: pendiente[0] + rand() * (pendiente[1] - pendiente[0]),
+  }));
+  let silueta = `M0 ${SUELO}`;
+  let cresta = '';
+  for (let x = 0; x < MAX_COLS; x++) {
+    let top = SUELO;
+    for (const c of cimas) top = Math.min(top, c.y + Math.abs(x + 0.5 - c.x) * c.m);
+    const y = Math.round(top);
+    silueta += `V${y}h1`;
+    cresta += `M${x} ${y}h1v1h-1z`;
+  }
+  silueta += `V${SUELO}z`;
+  return { silueta, cresta };
+}
+
+const montesLejanos = cordillera(3, 9, [12, 24], [0.5, 0.9]);
+const montesCercanos = cordillera(11, 12, [26, 36], [0.7, 1.2]);
+
 const bosqueLejano = bosque(7, [9, 16], [12, 20], false);
 const bosqueCercano = bosque(21, [20, 36], [16, 28], true);
 
@@ -173,6 +200,16 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
 
     <!-- Resplandor del horizonte -->
     <rect x="0" y="20" width={MAX_COLS} height={SUELO - 20} fill="url(#horizonte)" />
+
+    <!-- Montañas: dos cordilleras con cresta de neón tenue -->
+    <g class="mountains mountains-far">
+      <path class="m-body" d={montesLejanos.silueta} />
+      <path class="m-ridge" d={montesLejanos.cresta} />
+    </g>
+    <g class="mountains mountains-near">
+      <path class="m-body" d={montesCercanos.silueta} />
+      <path class="m-ridge" d={montesCercanos.cresta} />
+    </g>
 
     <!-- Bosque cyberpunk: dos capas para dar profundidad -->
     <g class="forest forest-far">
@@ -306,6 +343,12 @@ const suelo = Array.from({ length: MAX_COLS / 8 }, (_, i) => ({ x: i * 8 + (i % 
   .px-k { fill: var(--accent-deep); }
   /* El "?" queda apagado en el estado final (el bloque ya fue usado) */
   .px-q { fill: var(--steel-2); }
+
+  /* Montañas: más oscuras y tenues que el bosque para quedar al fondo */
+  .mountains-far .m-body { fill: #191310; }
+  .mountains-far .m-ridge { fill: var(--accent-deep); opacity: 0.25; }
+  .mountains-near .m-body { fill: #1d1613; }
+  .mountains-near .m-ridge { fill: var(--accent); opacity: 0.2; }
 
   /* Bosque: siluetas oscuras con detalles de neón naranja, siempre tenues */
   .t-leaf { fill: #2b211c; }

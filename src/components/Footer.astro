@@ -5,7 +5,10 @@ const year = new Date().getFullYear();
 
 <footer class="site-footer">
   <div class="container inner">
-    <p>© {year} {perfil.nombre}</p>
+    <p class="brand-line">
+      <span class="brand" aria-hidden="true">S<span>.</span>G</span>
+      © {year} {perfil.nombre}
+    </p>
     <ul class="links" aria-label="Contacto">
       {contactos.map((c) => (
         <li>
@@ -22,8 +25,42 @@ const year = new Date().getFullYear();
 
 <style>
   .site-footer {
-    border-top: 1px solid var(--border);
+    position: relative;
     margin-top: var(--section-gap);
+    /* Brillo cálido que sube desde abajo, sobre un tono apenas más claro */
+    background:
+      radial-gradient(40rem 10rem at 50% 100%, rgba(242, 140, 56, 0.1), transparent 70%),
+      linear-gradient(to bottom, transparent, rgba(28, 22, 19, 0.7));
+  }
+  /* Línea superior con degradado naranja (igual que el encabezado) */
+  .site-footer::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(196, 101, 31, 0.6) 25%,
+      rgba(255, 179, 107, 0.7) 50%,
+      rgba(196, 101, 31, 0.6) 75%,
+      transparent
+    );
+  }
+  .brand-line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .brand span {
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(242, 140, 56, 0.6);
   }
   .inner {
     display: flex;
