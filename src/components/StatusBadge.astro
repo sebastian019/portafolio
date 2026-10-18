@@ -1,0 +1,68 @@
+---
+// Etiqueta de estado de un proyecto. Con "En progreso" muestra un punto
+// naranja que late muy suave (quieto con prefers-reduced-motion).
+interface Props {
+  estado: string;
+}
+const { estado } = Astro.props;
+const enProgreso = estado === 'En progreso';
+---
+
+<span class:list={['status', { 'is-live': enProgreso }]}>
+  <span class="dot" aria-hidden="true"></span>
+  {enProgreso ? 'En progreso…' : estado}
+</span>
+
+<style>
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.15rem 0.7rem 0.15rem 0.55rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .is-live {
+    border-color: rgba(242, 140, 56, 0.45);
+  }
+  .dot {
+    position: relative;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+  .is-live .dot {
+    background: var(--accent);
+  }
+  /* Halo que se expande y desvanece despacio: sin parpadeo */
+  .is-live .dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: halo 2.4s ease-out infinite;
+  }
+  @keyframes halo {
+    from {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    to {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .is-live .dot::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+</style>

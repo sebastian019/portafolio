@@ -12,7 +12,10 @@ const proyectos = defineCollection({
     // Contexto corto que se muestra en la tarjeta (p. ej. "Seminario de título").
     tipo: z.string(),
     inicio: z.coerce.date(),
-    estado: z.enum(['En desarrollo', 'Terminado', 'Pausado']),
+    // "En progreso" se muestra como "En progreso…" con un punto animado.
+    estado: z.enum(['En progreso', 'Terminado', 'Pausado']),
+    // Fecha de la última actualización del contenido (opcional).
+    actualizado: z.coerce.date().optional(),
     tecnologias: z.array(z.string()).default([]),
     // Aviso destacado al inicio del caso de estudio (opcional).
     aviso: z.string().optional(),

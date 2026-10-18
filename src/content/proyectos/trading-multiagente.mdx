@@ -1,15 +1,20 @@
 ---
 titulo: Sistema de trading con agentes de IA
-resumen: Sistema multiagente en el que distintos agentes de IA analizan datos de mercado y colaboran para apoyar la toma de decisiones de trading. Se prueba en paper trading con Alpaca, sin dinero real.
+resumen: Sistema multiagente que combina un LLM local con optimización convexa y control de riesgo para apoyar decisiones de inversión. Se prueba en paper trading con Alpaca, sin dinero real.
 tipo: Seminario de título
 inicio: 2026-08-01
-estado: En desarrollo
-# TODO: agregar las demás tecnologías del proyecto (lenguaje, frameworks).
+estado: En progreso
+actualizado: 2026-10-18
 tecnologias:
+  - Python
+  - LangGraph
+  - Pydantic
   - Ollama
   - Llama 3.1 8B (local)
+  - Optimización convexa
+  - CMA-ES
   - Alpaca (paper trading)
-aviso: Trading simulado. El sistema se prueba con paper trading en Alpaca y no opera con dinero real.
+aviso: "Trading simulado: proyecto académico, sin dinero real. No es asesoría financiera."
 destacado: true
 orden: 1
 ---
@@ -25,6 +30,7 @@ orden: 1
 */}
 
 import ArchitectureDiagram from '../../components/ArchitectureDiagram.astro';
+import Avance from '../../components/Avance.astro';
 import Todo from '../../components/Todo.astro';
 
 Proyecto académico en desarrollo (seminario de título). El repositorio es privado; esta página resume el estado al 18 de octubre de 2026.
@@ -72,26 +78,24 @@ Después de los agentes, un optimizador convexo calcula los pesos del portafolio
 
 ## Estado actual
 
-**Hecho**
-
-- Cliente del LLM con salida estructurada y registro de cada intento.
-- Agente de Percepción v1.1, congelado el 15 de octubre de 2026: fuentes declaradas, caché y evaluación por documento.
-- Evaluación de un universo de activos con un solo comando.
-- Pruebas de control para ver si el modelo recuerda eventos posteriores a su fecha de corte.
-
-**En progreso**
-
-- Armado del conjunto de prueba separado.
-
-**Pendiente**
-
-- Agente Cuantitativo.
-- Optimizador convexo.
-- Manager: primero determinista y luego con LLM.
-- Orquestación completa.
-- Órdenes de paper trading.
-- Ejecución diaria con bitácora.
-- Backtest.
+<Avance
+  hecho={[
+    'Cliente del LLM con salida estructurada y registro de cada intento.',
+    'Agente de Percepción v1.1, congelado el 15 de octubre de 2026: fuentes declaradas, caché y evaluación por documento.',
+    'Evaluación de un universo de activos con un solo comando.',
+    'Pruebas de control para ver si el modelo recuerda eventos posteriores a su fecha de corte.',
+  ]}
+  enProgreso={['Armado del conjunto de prueba separado.']}
+  pendiente={[
+    'Agente Cuantitativo.',
+    'Optimizador convexo.',
+    'Manager: primero determinista y luego con LLM.',
+    'Orquestación completa.',
+    'Órdenes de paper trading.',
+    'Ejecución diaria con bitácora.',
+    'Backtest.',
+  ]}
+/>
 
 ## Aprendizajes
 

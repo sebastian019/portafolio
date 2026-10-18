@@ -2,6 +2,7 @@
 // Tarjeta de proyecto. Recibe una entrada de la colección "proyectos".
 import type { CollectionEntry } from 'astro:content';
 import { url } from '../utils/url';
+import StatusBadge from './StatusBadge.astro';
 
 interface Props {
   proyecto: CollectionEntry<'proyectos'>;
@@ -16,8 +17,7 @@ const href = url(`/proyectos/${proyecto.id}/`);
   <div class="meta">
     <span class="idx">{String(indice + 1).padStart(2, '0')}</span>
     <span>{tipo}</span>
-    <span class="dot" aria-hidden="true">·</span>
-    <span>{estado}</span>
+    <StatusBadge estado={estado} />
   </div>
   <h3>
     <a href={href}>{titulo}</a>
@@ -49,7 +49,8 @@ const href = url(`/proyectos/${proyecto.id}/`);
   .meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
     font-size: 0.85rem;
     color: var(--text-muted);
   }

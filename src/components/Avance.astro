@@ -1,0 +1,135 @@
+---
+// Tablero de avance de un proyecto en tres grupos: Hecho, En progreso y
+// Pendiente. Se usa desde el MDX pasando cada lista como prop.
+interface Props {
+  hecho?: string[];
+  enProgreso?: string[];
+  pendiente?: string[];
+}
+const { hecho = [], enProgreso = [], pendiente = [] } = Astro.props;
+
+const grupos = [
+  { id: 'hecho', titulo: 'Hecho', items: hecho },
+  { id: 'progreso', titulo: 'En progreso', items: enProgreso },
+  { id: 'pendiente', titulo: 'Pendiente', items: pendiente },
+];
+---
+
+<div class="avance">
+  {grupos.map((g) => (
+    <section class={`grupo grupo-${g.id}`} aria-labelledby={`avance-${g.id}`}>
+      <h3 id={`avance-${g.id}`}>
+        <span class="marca" aria-hidden="true"></span>
+        {g.titulo}
+        <span class="cuenta">
+          {g.items.length}
+          <span class="sr-only"> {g.items.length === 1 ? 'tarea' : 'tareas'}</span>
+        </span>
+      </h3>
+      <ul>
+        {g.items.map((item) => <li>{item}</li>)}
+      </ul>
+    </section>
+  ))}
+</div>
+
+<style>
+  .avance {
+    display: grid;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  @media (min-width: 48rem) {
+    .avance {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .grupo {
+    padding: 1.25rem 1.25rem 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  /* El grupo activo lleva el borde superior naranja */
+  .grupo-progreso {
+    border-top: 2px solid var(--accent);
+  }
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 1rem;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .cuenta {
+    margin-left: auto;
+    font-weight: 400;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  /* Marcas: ✓ hecho · punto naranja en progreso · círculo vacío pendiente */
+  .marca {
+    flex: none;
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+  }
+  .grupo-hecho .marca {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    position: relative;
+  }
+  .grupo-hecho .marca::after {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.1rem;
+    width: 0.2rem;
+    height: 0.4rem;
+    border: solid var(--accent);
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+  .grupo-progreso .marca {
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .grupo-pendiente .marca {
+    border: 1px solid var(--text-muted);
+  }
+  .avance ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+  .avance li {
+    position: relative;
+    padding-left: 1rem;
+  }
+  .avance li + li {
+    margin-top: 0.6rem;
+  }
+  .avance li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 0.35rem;
+    height: 1px;
+    background: var(--accent);
+  }
+  .grupo-hecho li,
+  .grupo-pendiente li {
+    color: var(--text-muted);
+  }
+  .grupo-pendiente li::before {
+    background: var(--text-muted);
+  }
+</style>

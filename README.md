@@ -35,7 +35,8 @@ npm run preview   # sirve dist/ para revisarlo antes de publicar
    resumen: Una o dos frases.
    tipo: Proyecto personal
    inicio: 2026-01-01
-   estado: En desarrollo   # En desarrollo | Terminado | Pausado
+   estado: En progreso     # En progreso | Terminado | Pausado
+   actualizado: 2026-10-01 # opcional: "Última actualización" en el caso de estudio
    tecnologias: [Python, SQL]
    orden: 2                # menor = aparece primero
    ---
