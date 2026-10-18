@@ -38,33 +38,34 @@ const mid = W / 2;
     <text x="415" y="48" class="label">Noticias</text>
     <text x="415" y="70" class="small">fuentes declaradas</text>
 
-    <line x1="145" y1="80" x2="145" y2="162" class="edge" marker-end="url(#flecha)" />
-    <line x1="415" y1="80" x2="415" y2="162" class="edge" marker-end="url(#flecha)" />
+    <line x1="145" y1="80" x2="145" y2="136" class="edge" marker-end="url(#flecha)" />
+    <line x1="415" y1="80" x2="415" y2="136" class="edge" marker-end="url(#flecha)" />
 
-    {/* Agentes: roles cerrados, orquestados por LangGraph */}
-    <rect x="20" y="112" width={W - 40} height="300" rx="16" class="group" />
-    <text x="40" y="140" class="group-label">Agentes · LangGraph (supervisor)</text>
+    {/* Agentes: roles cerrados, orquestados por LangGraph. La etiqueta del
+        grupo va abajo para que ninguna flecha la cruce. */}
+    <rect x="20" y="112" width={W - 40} height="304" rx="16" class="group" />
 
-    <rect x="40" y="166" width="225" height="92" rx="10" class="box" />
-    <text x="152" y="200" class="label accent">Cuantitativo</text>
-    <text x="152" y="228" class="small">estima el régimen</text>
-    <text x="152" y="248" class="small">de mercado</text>
+    <rect x="40" y="140" width="225" height="92" rx="10" class="box" />
+    <text x="152" y="174" class="label accent">Cuantitativo</text>
+    <text x="152" y="202" class="small">estima el régimen</text>
+    <text x="152" y="222" class="small">de mercado</text>
 
-    <rect x="295" y="166" width="225" height="92" rx="10" class="box" />
-    <text x="407" y="200" class="label accent">Percepción</text>
-    <text x="407" y="228" class="small">sentimiento y confianza</text>
-    <text x="407" y="248" class="small">buscar → leer → evaluar</text>
+    <rect x="295" y="140" width="225" height="92" rx="10" class="box" />
+    <text x="407" y="174" class="label accent">Percepción</text>
+    <text x="407" y="202" class="small">sentimiento y confianza</text>
+    <text x="407" y="222" class="small">buscar → leer → evaluar</text>
 
-    <line x1="152" y1="258" x2="230" y2="296" class="edge" marker-end="url(#flecha)" />
-    <line x1="407" y1="258" x2="330" y2="296" class="edge" marker-end="url(#flecha)" />
+    <line x1="152" y1="232" x2="230" y2="270" class="edge" marker-end="url(#flecha)" />
+    <line x1="407" y1="232" x2="330" y2="270" class="edge" marker-end="url(#flecha)" />
 
-    <rect x="120" y="300" width="320" height="70" rx="10" class="box" />
-    <text x={mid} y="330" class="label accent">Manager</text>
-    <text x={mid} y="356" class="small">acepta la señal o pide reanalizar</text>
+    <rect x="120" y="274" width="320" height="70" rx="10" class="box" />
+    <text x={mid} y="304" class="label accent">Manager</text>
+    <text x={mid} y="330" class="small">acepta la señal o pide reanalizar</text>
 
+    <text x={mid} y="374" class="small group-label-c">Agentes · LangGraph (supervisor)</text>
     <text x={mid} y="398" class="small">mensajes JSON validados con Pydantic</text>
 
-    <line x1={mid} y1="412" x2={mid} y2="446" class="edge" marker-end="url(#flecha)" />
+    <line x1={mid} y1="416" x2={mid} y2="446" class="edge" marker-end="url(#flecha)" />
 
     {/* Veto de seguridad */}
     <rect x="100" y="450" width="360" height="70" rx="12" class="box" />
@@ -139,9 +140,8 @@ const mid = W / 2;
     stroke: var(--border);
     stroke-dasharray: 5 6;
   }
-  .group-label {
-    fill: var(--text-muted);
-    font-size: 17px;
+  .group-label-c {
+    fill: var(--text);
   }
   .label {
     fill: var(--text);

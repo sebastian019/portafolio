@@ -10,9 +10,9 @@ const links = [
 ];
 ---
 
-<header class="site-header">
+<header class="site-header" data-header>
   <div class="container inner">
-    <a href={url('/')} class="brand" aria-label="Inicio">
+    <a href={url('/')} class="brand" aria-label="Sebastián Gatica, inicio">
       S<span>.</span>G
     </a>
     <nav aria-label="Principal">
@@ -24,6 +24,27 @@ const links = [
 </header>
 
 <script>
+  // Fondo sólido al hacer scroll; transparente solo en el tope de la página.
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  if (header) {
+    let pendiente = false;
+    const actualizar = () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 8);
+      pendiente = false;
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!pendiente) {
+          pendiente = true;
+          requestAnimationFrame(actualizar);
+        }
+      },
+      { passive: true },
+    );
+    actualizar();
+  }
+
   // Resalta en naranja el enlace de la sección que se está viendo.
   const navLinks = document.querySelectorAll<HTMLAnchorElement>('[data-nav]');
   const sections = [...navLinks]
@@ -55,12 +76,17 @@ const links = [
     position: sticky;
     top: 0;
     z-index: 50;
-    /* Tinte cálido: un brillo naranja muy suave desde la marca */
+    /* En el tope de la página: transparente */
+    background: transparent;
+    transition: background-color 0.3s var(--ease), backdrop-filter 0.3s var(--ease);
+  }
+  /* Al hacer scroll: fondo sólido con leve transparencia y desenfoque */
+  .site-header.is-scrolled {
     background:
-      radial-gradient(28rem 6rem at 10% 0%, rgba(242, 140, 56, 0.1), transparent 70%),
-      rgba(22, 18, 16, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+      radial-gradient(28rem 6rem at 10% 0%, rgba(242, 140, 56, 0.08), transparent 70%),
+      rgba(20, 17, 16, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
   /* Línea inferior con degradado naranja que se desvanece en los bordes */
   .site-header::after {
@@ -76,6 +102,12 @@ const links = [
       rgba(196, 101, 31, 0.6) 75%,
       transparent
     );
+    opacity: 0;
+    transition: opacity 0.3s var(--ease);
+  }
+  /* Borde inferior sutil solo cuando el encabezado tiene fondo */
+  .site-header.is-scrolled::after {
+    opacity: 0.6;
   }
   .inner {
     display: flex;

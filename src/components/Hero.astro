@@ -29,7 +29,11 @@ import { cvHref } from '../utils/cv';
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-block: 4rem;
+    padding-block: 4rem 1rem; /* poco aire bajo la escena del robot */
+  }
+  /* La primera sección queda más cerca de la escena que el resto */
+  :global(section.hero + section.section) {
+    padding-top: clamp(3.5rem, 7vw, 5.5rem);
   }
   .eyebrow {
     font-size: 0.85rem;
