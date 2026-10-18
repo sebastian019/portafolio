@@ -34,12 +34,12 @@ export const perfil = {
 
   idiomas: [
     { idioma: 'Español', nivel: 'Nativo' },
-    { idioma: 'Inglés', nivel: 'En progreso — preparando Cambridge B1 Preliminary (beca PUCV)' },
+    { idioma: 'Inglés', nivel: 'En progreso: preparando Cambridge B1 Preliminary (beca PUCV)' },
   ],
 
   enlaces: {
     correo: 'sebastian.gatica2004@gmail.com',
-    github: 'https://github.com/sebastian019?tab=repositories',
+    github: 'https://github.com/sebastian019',
     linkedin: 'https://www.linkedin.com/in/sebastián-gatica-leiva-b97296441',
   },
 
