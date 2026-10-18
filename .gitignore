@@ -3,10 +3,21 @@
 .env.*
 !.env.example
 
-# Dependencias y builds
+# Dependencias y builds (incluye node_modules/.review y cualquier subcarpeta)
 node_modules/
 dist/
 .astro/
+
+# Archivos locales de trabajo (no forman parte del sitio)
+CLAUDE.md
+.claude/
+
+# Temporales y logs
+*.log
+npm-debug.log*
+*.tmp
+*.temp
+.cache/
 
 # Sistema
 .DS_Store

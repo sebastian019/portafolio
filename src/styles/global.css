@@ -192,12 +192,6 @@ svg {
   padding: 0.2rem 0.75rem;
 }
 
-/* Marca visual para datos pendientes */
-.todo {
-  color: var(--text-muted);
-  font-style: italic;
-}
-
 /* Aparición sutil al hacer scroll (ver BaseLayout).
    Solo se oculta si hay JS (clase .js en <html>), así sin JS todo se ve. */
 .js .reveal {
