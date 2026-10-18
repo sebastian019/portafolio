@@ -20,7 +20,7 @@ const mid = W / 2;
       El Manager acepta la señal o pide reanalizar. Los agentes se comunican con mensajes JSON
       validados y se orquestan con LangGraph. Luego, un veto de seguridad excluye los activos con
       confianza baja o con fallas del modelo. Un optimizador convexo, calibrado por un algoritmo
-      evolutivo CMA-ES, equilibra retorno y riesgo y entrega los pesos del portafolio, que quedan
+      evolutivo CMA-ES, equilibra retorno y riesgo y entrega los pesos de la cartera, que quedan
       registrados en una bitácora. Las órdenes de paper trading en Alpaca están pendientes y son
       simuladas, sin dinero real. Todo corre en local con Llama 3.1 8B a través de Ollama.
     </desc>
@@ -89,7 +89,7 @@ const mid = W / 2;
 
     {/* Salidas */}
     <rect x="30" y="696" width="330" height="60" rx="12" class="box" />
-    <text x="195" y="733" class="label">Pesos del portafolio</text>
+    <text x="195" y="733" class="label">Pesos de la cartera</text>
 
     <line x1="360" y1="726" x2="372" y2="726" class="edge" marker-end="url(#flecha)" />
     <rect x="376" y="696" width="164" height="60" rx="12" class="box" />

@@ -1,4 +1,4 @@
-// Datos personales del portafolio, en un solo lugar.
+// Datos personales del sitio, en un solo lugar.
 // Todo lo marcado como TODO falta confirmarlo: no inventar valores.
 
 export const perfil = {

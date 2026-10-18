@@ -51,7 +51,7 @@ El sistema tiene tres agentes con roles cerrados:
 
 Los agentes se comunican con mensajes estructurados y validados (JSON con Pydantic); ninguno escribe texto libre. La orquestación usa LangGraph con un patrón supervisor.
 
-Después de los agentes, un optimizador convexo calcula los pesos del portafolio y todo queda registrado en una bitácora en Markdown. Un algoritmo evolutivo (CMA-ES) calibra los hiperparámetros. Todo corre en local con Llama 3.1 8B a través de Ollama, en una GPU de 8 GB.
+Después de los agentes, un optimizador convexo calcula los pesos de la cartera y todo queda registrado en una bitácora en Markdown. Un algoritmo evolutivo (CMA-ES) calibra los hiperparámetros. Todo corre en local con Llama 3.1 8B a través de Ollama, en una GPU de 8 GB.
 
 <ArchitectureDiagram />
 
