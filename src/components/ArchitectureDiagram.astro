@@ -1,38 +1,28 @@
 ---
-// Diagrama simple de la arquitectura del sistema multiagente (SVG inline).
-// Solo muestra lo confirmado: datos de mercado -> agentes que colaboran ->
-// apoyo a la decisión -> orden simulada en Alpaca (paper trading).
-// TODO (Sebastián): definir cuántos agentes hay y el rol de cada uno;
-// basta con editar el arreglo `agentes`.
-const agentes = [
-  { nombre: 'Agente 1', rol: 'TODO: rol' },
-  { nombre: 'Agente 2', rol: 'TODO: rol' },
-  { nombre: 'Agente 3', rol: 'TODO: rol' },
-];
-
-// Geometría: diseño vertical y angosto (viewBox 560 de ancho) para que el
+// Diagrama de la arquitectura del sistema multiagente (SVG inline).
+// Muestra el qué y el porqué, nunca el cómo exacto: sin parámetros, umbrales,
+// fórmulas, nombres de fuentes ni de activos.
+//
+// Geometría: diseño vertical y angosto (viewBox de 560 de ancho) para que el
 // texto siga legible en celulares; el SVG escala solo.
 const W = 560;
-const agenteH = 64;
-const gap = 16;
-const agentesTop = 140;
-const agentesAlto = agentes.length * agenteH + (agentes.length - 1) * gap;
-const salidaY = agentesTop + agentesAlto + 56;
-const alpacaY = salidaY + 120;
-const H = alpacaY + 90;
+const H = 936;
+const mid = W / 2;
 ---
 
 <figure class="diagram">
-  <svg
-    viewBox={`0 0 ${W} ${H}`}
-    role="img"
-    aria-labelledby="diag-title diag-desc"
-  >
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="diag-title diag-desc">
     <title id="diag-title">Arquitectura del sistema de trading con agentes de IA</title>
     <desc id="diag-desc">
-      Los datos de mercado llegan a varios agentes de IA, que colaboran para apoyar la
-      decisión de trading. La decisión resultante se ejecuta como orden simulada en Alpaca
-      (paper trading), sin dinero real. Los roles de los agentes están por definir.
+      Los precios llegan al Agente Cuantitativo, que estima el régimen de mercado. Las noticias,
+      tomadas solo de fuentes declaradas de antemano, llegan al Agente de Percepción, que busca,
+      lee y evalúa cada documento y entrega por empresa un sentimiento y un nivel de confianza.
+      El Manager acepta la señal o pide reanalizar. Los agentes se comunican con mensajes JSON
+      validados y se orquestan con LangGraph. Luego, un veto de seguridad excluye los activos con
+      confianza baja o con fallas del modelo. Un optimizador convexo, calibrado por un algoritmo
+      evolutivo CMA-ES, equilibra retorno y riesgo y entrega los pesos del portafolio, que quedan
+      registrados en una bitácora. Las órdenes de paper trading en Alpaca están pendientes y son
+      simuladas, sin dinero real. Todo corre en local con Llama 3.1 8B a través de Ollama.
     </desc>
 
     <defs>
@@ -41,39 +31,85 @@ const H = alpacaY + 90;
       </marker>
     </defs>
 
-    <!-- Entrada: datos de mercado -->
-    <rect x="130" y="20" width="300" height="60" rx="12" class="box" />
-    <text x={W / 2} y="57" class="label">Datos de mercado</text>
-    <line x1={W / 2} y1="80" x2={W / 2} y2={agentesTop - 36} class="edge" marker-end="url(#flecha)" />
+    <!-- Entradas -->
+    <rect x="30" y="20" width="230" height="60" rx="12" class="box" />
+    <text x="145" y="57" class="label">Precios</text>
+    <rect x="300" y="20" width="230" height="60" rx="12" class="box" />
+    <text x="415" y="48" class="label">Noticias</text>
+    <text x="415" y="70" class="small">fuentes declaradas</text>
 
-    <!-- Grupo de agentes que colaboran -->
-    <rect x="30" y={agentesTop - 30} width={W - 60} height={agentesAlto + 50} rx="16" class="group" />
-    <text x="50" y={agentesTop - 6} class="group-label">Agentes de IA (colaboran entre sí)</text>
-    {agentes.map((a, i) => {
-      const y = agentesTop + 10 + i * (agenteH + gap);
-      return (
-        <g>
-          <rect x="60" y={y} width={W - 120} height={agenteH - 10} rx="10" class="box" />
-          <text x="84" y={y + 34} class="label-left">
-            <tspan class="accent">{a.nombre}</tspan>
-            <tspan dx="14" class="muted">{a.rol}</tspan>
-          </text>
-        </g>
-      );
-    })}
+    <line x1="145" y1="80" x2="145" y2="162" class="edge" marker-end="url(#flecha)" />
+    <line x1="415" y1="80" x2="415" y2="162" class="edge" marker-end="url(#flecha)" />
 
-    <line x1={W / 2} y1={agentesTop + agentesAlto + 20} x2={W / 2} y2={salidaY - 4} class="edge" marker-end="url(#flecha)" />
+    <!-- Agentes: roles cerrados, orquestados por LangGraph -->
+    <rect x="20" y="112" width={W - 40} height="300" rx="16" class="group" />
+    <text x="40" y="140" class="group-label">Agentes · LangGraph (supervisor)</text>
 
-    <!-- Salida: apoyo a la decisión y orden simulada -->
-    <rect x="130" y={salidaY} width="300" height="60" rx="12" class="box" />
-    <text x={W / 2} y={salidaY + 37} class="label">Apoyo a la decisión</text>
-    <line x1={W / 2} y1={salidaY + 60} x2={W / 2} y2={alpacaY - 4} class="edge" marker-end="url(#flecha)" />
-    <rect x="100" y={alpacaY} width="360" height="74" rx="12" class="box box-accent" />
-    <text x={W / 2} y={alpacaY + 32} class="label">Alpaca · paper trading</text>
-    <text x={W / 2} y={alpacaY + 56} class="small">orden simulada, sin dinero real</text>
+    <rect x="40" y="166" width="225" height="92" rx="10" class="box" />
+    <text x="152" y="200" class="label accent">Cuantitativo</text>
+    <text x="152" y="228" class="small">estima el régimen</text>
+    <text x="152" y="248" class="small">de mercado</text>
+
+    <rect x="295" y="166" width="225" height="92" rx="10" class="box" />
+    <text x="407" y="200" class="label accent">Percepción</text>
+    <text x="407" y="228" class="small">sentimiento y confianza</text>
+    <text x="407" y="248" class="small">buscar → leer → evaluar</text>
+
+    <line x1="152" y1="258" x2="230" y2="296" class="edge" marker-end="url(#flecha)" />
+    <line x1="407" y1="258" x2="330" y2="296" class="edge" marker-end="url(#flecha)" />
+
+    <rect x="120" y="300" width="320" height="70" rx="10" class="box" />
+    <text x={mid} y="330" class="label accent">Manager</text>
+    <text x={mid} y="356" class="small">acepta la señal o pide reanalizar</text>
+
+    <text x={mid} y="398" class="small">mensajes JSON validados con Pydantic</text>
+
+    <line x1={mid} y1="412" x2={mid} y2="446" class="edge" marker-end="url(#flecha)" />
+
+    <!-- Veto de seguridad -->
+    <rect x="100" y="450" width="360" height="70" rx="12" class="box" />
+    <text x={mid} y="480" class="label">Veto de seguridad</text>
+    <text x={mid} y="506" class="small">confianza baja o fallo → se excluye</text>
+
+    <line x1="195" y1="520" x2="195" y2="556" class="edge" marker-end="url(#flecha)" />
+
+    <!-- Optimizador + calibración evolutiva -->
+    <rect x="30" y="560" width="330" height="96" rx="12" class="box box-accent" />
+    <text x="195" y="594" class="label">Optimizador convexo</text>
+    <text x="195" y="620" class="small">retorno vs. riesgo</text>
+    <text x="195" y="642" class="small">solo largos · tope por activo</text>
+
+    <rect x="376" y="568" width="164" height="80" rx="12" class="box box-dashed" />
+    <text x="458" y="598" class="label-sm">CMA-ES</text>
+    <text x="458" y="620" class="small">calibra</text>
+    <text x="458" y="638" class="small">hiperparámetros</text>
+    <line x1="376" y1="608" x2="364" y2="608" class="edge edge-dashed" marker-end="url(#flecha)" />
+
+    <line x1="195" y1="656" x2="195" y2="692" class="edge" marker-end="url(#flecha)" />
+
+    <!-- Salidas -->
+    <rect x="30" y="696" width="330" height="60" rx="12" class="box" />
+    <text x="195" y="733" class="label">Pesos del portafolio</text>
+
+    <line x1="360" y1="726" x2="372" y2="726" class="edge" marker-end="url(#flecha)" />
+    <rect x="376" y="696" width="164" height="60" rx="12" class="box" />
+    <text x="458" y="722" class="label-sm">Bitácora</text>
+    <text x="458" y="744" class="small">Markdown</text>
+
+    <line x1="195" y1="756" x2="195" y2="792" class="edge edge-dashed" marker-end="url(#flecha)" />
+
+    <!-- Paper trading (pendiente) -->
+    <rect x="30" y="796" width="500" height="74" rx="12" class="box box-dashed box-accent" />
+    <text x={mid} y="828" class="label">Alpaca · paper trading (pendiente)</text>
+    <text x={mid} y="852" class="small">órdenes simuladas, sin dinero real</text>
+
+    <!-- Entorno -->
+    <text x={mid} y="914" class="small">Todo en local: Llama 3.1 8B vía Ollama, GPU de 8 GB</text>
   </svg>
   <figcaption>
-    Diagrama simplificado. Los roles de cada agente y cómo se coordinan están pendientes de documentar.
+    Diagrama simplificado. Las líneas punteadas marcan la calibración y la parte que aún está
+    pendiente. El modelo de lenguaje solo produce una señal acotada; el peso de cada activo lo
+    decide el optimizador.
   </figcaption>
 </figure>
 
@@ -100,6 +136,9 @@ const H = alpacaY + 90;
   .box-accent {
     stroke: var(--accent);
   }
+  .box-dashed {
+    stroke-dasharray: 6 5;
+  }
   .group {
     fill: none;
     stroke: var(--border);
@@ -109,12 +148,16 @@ const H = alpacaY + 90;
     fill: var(--text-muted);
     font-size: 17px;
   }
-  .label,
-  .label-left {
+  .label {
     fill: var(--text);
     font-size: 22px;
   }
+  .label-sm {
+    fill: var(--text);
+    font-size: 19px;
+  }
   .label,
+  .label-sm,
   .small {
     text-anchor: middle;
   }
@@ -125,13 +168,12 @@ const H = alpacaY + 90;
   .accent {
     fill: var(--accent);
   }
-  .muted {
-    fill: var(--text-muted);
-    font-style: italic;
-  }
   .edge {
     stroke: var(--text-muted);
     stroke-width: 1.5;
+  }
+  .edge-dashed {
+    stroke-dasharray: 5 5;
   }
   .arrow-head {
     fill: var(--text-muted);

@@ -14,49 +14,94 @@ destacado: true
 orden: 1
 ---
 
+{/*
+  REGLAS DE CONTENIDO DE ESTA PÁGINA (repositorio privado, proyecto de título):
+  explicar el qué y el porqué, nunca el cómo exacto. NO incluir: fórmulas o
+  ecuaciones, valores de parámetros o umbrales, pesos por fuente, prompts,
+  nombres de fuentes de datos ni de tickers, estructura de carpetas o nombres
+  de archivos, cifras de resultados, llaves, rutas locales, nombres de
+  profesores ni enlace al repositorio. Aclarar siempre que el trading es
+  simulado y que es un proyecto académico en desarrollo.
+*/}
+
 import ArchitectureDiagram from '../../components/ArchitectureDiagram.astro';
 import Todo from '../../components/Todo.astro';
 
-## Contexto y problema
+Proyecto académico en desarrollo (seminario de título). El repositorio es privado; esta página resume el estado al 18 de octubre de 2026.
 
-Este proyecto es mi seminario de título y está en desarrollo desde agosto de 2026. Nace de mi interés por el sector financiero y por cómo la inteligencia artificial puede apoyar decisiones en ese ámbito.
+## Desafío
 
-<Todo>Describir el problema concreto que aborda el sistema y por qué es relevante.</Todo>
+Quiero usar noticias financieras para apoyar decisiones de inversión, pero sin dejar que un modelo de lenguaje decida solo. Un LLM pequeño lee bien, pero juzga mal cuando se le pide demasiado de una vez.
 
-## Enfoque
+A eso se suman tres exigencias:
 
-La idea es usar un sistema multiagente: en lugar de un único modelo que lo hace todo, distintos agentes de IA analizan datos de mercado y colaboran entre sí para apoyar la toma de decisiones de trading.
-
-El sistema usa un modelo de lenguaje (LLM) que se ejecuta localmente con Ollama: Llama 3.1 de 8 mil millones de parámetros (`llama3.1:8b`, unos 4,9 GB). Como corre en mi propio equipo, el modelo no depende de un servicio de IA en la nube.
-
-Todas las pruebas se hacen en paper trading con Alpaca, es decir, con operaciones simuladas y sin dinero real.
-
-<Todo>Explicar por qué se eligió un enfoque multiagente y cómo colaboran los agentes.</Todo>
+- **Sin look-ahead:** el sistema no puede usar información que todavía no existía en la fecha que se está simulando.
+- **Resultados reproducibles:** cualquier corrida tiene que poder repetirse y dar lo mismo.
+- **Todo en mi propio equipo:** ningún dato se envía a servicios de IA en la nube.
 
 ## Arquitectura
 
+El sistema tiene tres agentes con roles cerrados:
+
+- **Cuantitativo:** lee precios y estima el régimen de mercado.
+- **Percepción:** lee noticias y entrega, por empresa, un sentimiento y un nivel de confianza.
+- **Manager:** acepta la señal o pide reanalizar.
+
+Los agentes se comunican con mensajes estructurados y validados (JSON con Pydantic); ninguno escribe texto libre. La orquestación usa LangGraph con un patrón supervisor.
+
+Después de los agentes, un optimizador convexo calcula los pesos del portafolio y todo queda registrado en una bitácora en Markdown. Un algoritmo evolutivo (CMA-ES) calibra los hiperparámetros. Todo corre en local con Llama 3.1 8B a través de Ollama, en una GPU de 8 GB.
+
 <ArchitectureDiagram />
 
-<Todo>Completar el rol de cada agente y cómo se comunican o coordinan.</Todo>
+## Solución y decisiones de diseño
 
-## Tecnologías
+- **El LLM solo entrega una señal acotada.** Produce un sentimiento y una confianza; el peso de cada activo lo decide un modelo matemático explícito que equilibra el retorno esperado con el riesgo (varianza y pérdidas extremas), con un tope por activo y solo posiciones largas. Así el juicio del modelo nunca se traduce directo en dinero, aunque sea simulado.
+- **Todo lo demás es determinista y auditable.** Los indicadores, el control de riesgo, las ecuaciones y el optimizador no dependen del modelo de lenguaje, para que cada decisión se pueda revisar y explicar.
+- **Veto de seguridad.** Si la confianza es baja o el modelo falla, el activo se excluye. Un error de conexión se registra como error y nunca se confunde con un veto silencioso, para no ocultar fallas.
+- **Percepción trabaja en tres fases: buscar, leer y evaluar.** Cada documento leído se evalúa por separado y el resultado se combina con una regla fija, en vez de pedirle al modelo un juicio global, porque un modelo pequeño acierta más en tareas chicas y concretas.
+- **Fuentes declaradas de antemano.** El modelo busca solo dentro de un conjunto definido (una fuente de medios y una oficial por país, para EE. UU. y Reino Unido) y no navega libremente, para controlar qué información entra al sistema. Las respuestas se guardan en caché para poder repetir cualquier corrida.
+- **Salida estructurada, temperatura 0 y semilla fija.** Así las respuestas del modelo son lo más estables posible, y cada intento queda registrado para poder auditarlo.
+- **Los límites los impone el código, no el prompt.** Qué fuentes se consultan, hasta qué fecha y cuántas consultas se hacen lo controla el programa, porque una instrucción en el prompt se puede ignorar y una regla en el código no.
 
-- **Ollama** — ejecuta el modelo de lenguaje de forma local.
-- **Llama 3.1 8B** (`llama3.1:8b`, ~4,9 GB) — el LLM que usa el sistema, corriendo en local.
-- **Alpaca** — entorno de paper trading para probar el sistema con operaciones simuladas.
+## Cómo se evalúa
 
-<Todo>Agregar lenguaje, frameworks y librerías que usa el proyecto.</Todo>
+- **Backtest sin look-ahead** sobre un período posterior a la fecha de corte del modelo, para que no "recuerde" lo que pasó.
+- **Conjunto de prueba separado,** con lo esperado escrito antes de correrlo y los parámetros congelados, para no ajustar el sistema a los resultados.
+- **Paper trading con Alpaca:** operaciones simuladas, sin dinero real.
+- Entre otras cosas, se comparará la evaluación global contra la evaluación por documento.
 
 ## Estado actual
 
-En desarrollo (desde agosto de 2026).
+**Hecho**
 
-<Todo>Detallar qué partes ya funcionan y cuáles están en construcción.</Todo>
+- Cliente del LLM con salida estructurada y registro de cada intento.
+- Agente de Percepción v1.1, congelado el 15 de octubre de 2026: fuentes declaradas, caché y evaluación por documento.
+- Evaluación de un universo de activos con un solo comando.
+- Pruebas de control para ver si el modelo recuerda eventos posteriores a su fecha de corte.
+
+**En progreso**
+
+- Armado del conjunto de prueba separado.
+
+**Pendiente**
+
+- Agente Cuantitativo.
+- Optimizador convexo.
+- Manager: primero determinista y luego con LLM.
+- Orquestación completa.
+- Órdenes de paper trading.
+- Ejecución diaria con bitácora.
+- Backtest.
 
 ## Aprendizajes
 
-<Todo>Agregar aprendizajes del proyecto.</Todo>
+- Un modelo pequeño lee bien pero evalúa mal: conviene dividir la tarea en pasos chicos y combinarlos con reglas fijas.
+- Las reglas importantes deben estar en el código, no en el prompt.
+- La reproducibilidad exige caché, semilla fija y registro de cada intento.
+- El look-ahead es sutil: hasta una búsqueda web puede mostrar el presente en vez de la fecha simulada.
 
 ## Próximos pasos
 
-<Todo>Agregar próximos pasos del proyecto.</Todo>
+Primero, cerrar el conjunto de prueba. Después, construir el esqueleto completo de punta a punta (Agente Cuantitativo, optimizador, Manager y órdenes simuladas) y, sobre esa base, mejorarlo con experimentos y comparaciones.
+
+<Todo>Agregar capturas del sistema (por ejemplo, un extracto de la bitácora) sin datos sensibles, cuando estén disponibles.</Todo>

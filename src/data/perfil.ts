@@ -5,12 +5,11 @@ export const perfil = {
   nombre: 'Sebastián Gatica Leiva',
   titular: 'Estudiante de Ingeniería Civil Informática en la PUCV',
   bajada:
-    'Me interesa la IA aplicada a finanzas y los sistemas multiagente. Busco mi práctica profesional.',
+    'Me interesa la IA aplicada a finanzas y los sistemas multiagente.',
 
   sobreMi: [
     'Estudio Ingeniería Civil Informática en la Pontificia Universidad Católica de Valparaíso (PUCV), con egreso proyectado para 2027.',
     'Mi interés principal es la inteligencia artificial aplicada a finanzas, en particular los sistemas multiagente. Mi seminario de título va justamente por ahí. También me atraen la ciberseguridad y la infraestructura.',
-    'Hoy busco una práctica profesional donde pueda aportar y seguir aprendiendo en estas áreas.',
   ],
 
   experiencia: [

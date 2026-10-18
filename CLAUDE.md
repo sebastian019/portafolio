@@ -6,7 +6,7 @@ Vas a construir mi portafolio web como informático. Trabajamos por etapas: la e
 
 ## Quién soy
 - Sebastián Gatica Leiva, estudiante de Ingeniería Civil Informática en la PUCV (Valparaíso), egreso proyectado 2027.
-- Busco práctica profesional. Intereses: IA aplicada a finanzas, sistemas multiagente; también ciberseguridad e infraestructura.
+- Intereses: IA aplicada a finanzas, sistemas multiagente; también ciberseguridad e infraestructura.
 - Experiencia: práctica en el Instituto de Investigación y Control (IDIC), ene-feb 2025. Prototipo local de protección de documentos: comparé alternativas de cifrado midiendo tiempos de encriptado/desencriptado, implementé marcas de agua (quién abrió y quién guardó un documento) y control de acceso por niveles de permiso con usuarios de prueba cargados desde un CSV. Todo en entorno local.
 - Herramientas: Python, SQL, GitHub, Excel, Ollama, Claude, Gemini, NotebookLM, Alpaca (paper trading).
 - Idiomas: español nativo; inglés en progreso (preparando Cambridge B1 Preliminary, beca PUCV).
