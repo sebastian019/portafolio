@@ -31,7 +31,7 @@ const mid = W / 2;
       </marker>
     </defs>
 
-    <!-- Entradas -->
+    {/* Entradas */}
     <rect x="30" y="20" width="230" height="60" rx="12" class="box" />
     <text x="145" y="57" class="label">Precios</text>
     <rect x="300" y="20" width="230" height="60" rx="12" class="box" />
@@ -41,7 +41,7 @@ const mid = W / 2;
     <line x1="145" y1="80" x2="145" y2="162" class="edge" marker-end="url(#flecha)" />
     <line x1="415" y1="80" x2="415" y2="162" class="edge" marker-end="url(#flecha)" />
 
-    <!-- Agentes: roles cerrados, orquestados por LangGraph -->
+    {/* Agentes: roles cerrados, orquestados por LangGraph */}
     <rect x="20" y="112" width={W - 40} height="300" rx="16" class="group" />
     <text x="40" y="140" class="group-label">Agentes · LangGraph (supervisor)</text>
 
@@ -66,14 +66,14 @@ const mid = W / 2;
 
     <line x1={mid} y1="412" x2={mid} y2="446" class="edge" marker-end="url(#flecha)" />
 
-    <!-- Veto de seguridad -->
+    {/* Veto de seguridad */}
     <rect x="100" y="450" width="360" height="70" rx="12" class="box" />
     <text x={mid} y="480" class="label">Veto de seguridad</text>
     <text x={mid} y="506" class="small">confianza baja o fallo → se excluye</text>
 
     <line x1="195" y1="520" x2="195" y2="556" class="edge" marker-end="url(#flecha)" />
 
-    <!-- Optimizador + calibración evolutiva -->
+    {/* Optimizador + calibración evolutiva */}
     <rect x="30" y="560" width="330" height="96" rx="12" class="box box-accent" />
     <text x="195" y="594" class="label">Optimizador convexo</text>
     <text x="195" y="620" class="small">retorno vs. riesgo</text>
@@ -87,7 +87,7 @@ const mid = W / 2;
 
     <line x1="195" y1="656" x2="195" y2="692" class="edge" marker-end="url(#flecha)" />
 
-    <!-- Salidas -->
+    {/* Salidas */}
     <rect x="30" y="696" width="330" height="60" rx="12" class="box" />
     <text x="195" y="733" class="label">Pesos del portafolio</text>
 
@@ -98,19 +98,14 @@ const mid = W / 2;
 
     <line x1="195" y1="756" x2="195" y2="792" class="edge edge-dashed" marker-end="url(#flecha)" />
 
-    <!-- Paper trading (pendiente) -->
+    {/* Paper trading (pendiente) */}
     <rect x="30" y="796" width="500" height="74" rx="12" class="box box-dashed box-accent" />
     <text x={mid} y="828" class="label">Alpaca · paper trading (pendiente)</text>
     <text x={mid} y="852" class="small">órdenes simuladas, sin dinero real</text>
 
-    <!-- Entorno -->
+    {/* Entorno */}
     <text x={mid} y="914" class="small">Todo en local: Llama 3.1 8B vía Ollama, GPU de 8 GB</text>
   </svg>
-  <figcaption>
-    Diagrama simplificado. Las líneas punteadas marcan la calibración y la parte que aún está
-    pendiente. El modelo de lenguaje solo produce una señal acotada; el peso de cada activo lo
-    decide el optimizador.
-  </figcaption>
 </figure>
 
 <style>
@@ -177,10 +172,5 @@ const mid = W / 2;
   }
   .arrow-head {
     fill: var(--text-muted);
-  }
-  figcaption {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
   }
 </style>

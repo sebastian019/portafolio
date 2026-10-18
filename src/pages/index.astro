@@ -58,7 +58,7 @@ const proyectos = (await getCollection('proyectos')).sort(
     <p class="contact-lead reveal">
       Si te interesa conversar, escríbeme.
     </p>
-    <!-- Los tres contactos con el mismo formato: icono en círculo y nombre debajo -->
+    {/* Los tres contactos con el mismo formato: icono en círculo y nombre debajo */}
     <ul class="contact reveal">
       {contactos.map((c) => (
         <li>
@@ -76,9 +76,9 @@ const proyectos = (await getCollection('proyectos')).sort(
         </li>
       ))}
     </ul>
-    <!-- La dirección queda a la vista (y se puede copiar), en texto discreto -->
+    {/* La dirección queda a la vista (y se puede copiar), en texto discreto */}
     <p class="mail-text reveal">{perfil.enlaces.correo}</p>
-    <!-- Anuncia "copiado" a lectores de pantalla -->
+    {/* Anuncia "copiado" a lectores de pantalla */}
     <p class="sr-only" aria-live="polite" data-copy-status></p>
   </Section>
 </BaseLayout>
