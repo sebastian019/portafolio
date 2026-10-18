@@ -71,6 +71,7 @@ const href = url(`/proyectos/${proyecto.id}/`);
     content: '';
     position: absolute;
     inset: 0;
+    z-index: 1; /* por encima de todo el contenido: el clic siempre llega al enlace */
     border-radius: var(--radius);
   }
   .resumen {
@@ -78,6 +79,8 @@ const href = url(`/proyectos/${proyecto.id}/`);
     max-width: var(--reading);
   }
   .cta {
+    align-self: flex-start;
+    pointer-events: none; /* al moverse con el hover no debe tapar el enlace */
     margin-top: 0.5rem;
     font-size: 0.9rem;
     color: var(--accent);
