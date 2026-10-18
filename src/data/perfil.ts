@@ -42,9 +42,11 @@ export const perfil = {
     correo: 'sebastian.gatica2004@gmail.com',
     github: 'https://github.com/sebastian019?tab=repositories',
     linkedin: 'https://www.linkedin.com/in/sebastián-gatica-leiva-b97296441',
-    // TODO (solo en código, no se muestra en la página): agregar el CV en PDF
-    // en public/cv/ y sumarlo a `contactos` más abajo.
   },
+
+  // CV en PDF: el archivo va en public/cv/ con este nombre exacto. Si no
+  // existe al compilar, el botón y el enlace no se muestran (ver utils/cv.ts).
+  cv: '/cv/CV-Sebastian-Gatica.pdf',
 };
 
 // Enlaces de contacto listos para mostrar (sección Contacto y pie de página).

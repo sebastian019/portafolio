@@ -1,6 +1,7 @@
 ---
 import { perfil } from '../data/perfil';
 import PixelScene from './PixelScene.astro';
+import { cvHref } from '../utils/cv';
 ---
 
 <section class="hero container" aria-labelledby="hero-nombre">
@@ -12,6 +13,12 @@ import PixelScene from './PixelScene.astro';
   <div class="actions reveal">
     <a href="#proyectos" class="btn btn-primary">Ver proyectos</a>
     <a href="#contacto" class="btn btn-ghost">Contacto</a>
+    {cvHref && (
+      <a href={cvHref} class="btn btn-ghost" download target="_blank" rel="noopener">
+        Descargar CV
+        <span class="sr-only"> (PDF, se abre en una pestaña nueva)</span>
+      </a>
+    )}
   </div>
   <PixelScene />
 </section>

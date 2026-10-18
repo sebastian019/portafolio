@@ -1,5 +1,6 @@
 ---
 import { perfil, contactos } from '../data/perfil';
+import { cvHref } from '../utils/cv';
 const year = new Date().getFullYear();
 ---
 
@@ -18,6 +19,14 @@ const year = new Date().getFullYear();
           </a>
         </li>
       ))}
+      {cvHref && (
+        <li>
+          <a href={cvHref} download target="_blank" rel="noopener">
+            CV
+            <span class="sr-only"> (PDF, se abre en una pestaña nueva)</span>
+          </a>
+        </li>
+      )}
     </ul>
     <p>Hecho con Astro · Maipú, Chile</p>
   </div>
