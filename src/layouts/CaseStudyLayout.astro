@@ -19,7 +19,7 @@ const inicioTexto = mesAnio(inicio);
 const actualizadoTexto = actualizado ? mesAnio(actualizado) : null;
 ---
 
-<BaseLayout title={`${titulo} — ${perfil.nombre}`} description={resumen}>
+<BaseLayout title={`${titulo} — ${perfil.nombre}`} description={resumen} type="article">
   <article class="case container">
     <a class="back" href={url('/#proyectos')}>← Volver a proyectos</a>
 

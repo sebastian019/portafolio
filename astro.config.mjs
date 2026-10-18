@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 
 // Publicado en GitHub Pages como repo "portafolio":
 // https://sebastian019.github.io/portafolio
@@ -9,5 +10,5 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
   site: 'https://sebastian019.github.io',
   base: '/portafolio',
-  integrations: [mdx()],
+  integrations: [mdx(), sitemap()],
 });

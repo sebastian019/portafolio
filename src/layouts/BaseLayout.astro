@@ -12,14 +12,20 @@ import { url } from '../utils/url';
 interface Props {
   title?: string;
   description?: string;
+  /** "website" en la portada; "article" en los casos de estudio. */
+  type?: 'website' | 'article';
 }
 
 const {
   title = `${perfil.nombre} — Portafolio`,
   description = `${perfil.titular}. ${perfil.bajada}`,
+  type = 'website',
 } = Astro.props;
 
-const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefined;
+// URLs absolutas (site + base) para canonical y vista previa al compartir.
+const site = Astro.site ?? new URL('https://sebastian019.github.io');
+const canonical = new URL(Astro.url.pathname, site);
+const ogImage = new URL(url('/og.png'), site);
 ---
 
 <!doctype html>
@@ -31,11 +37,23 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefin
     <meta name="description" content={description} />
     <meta name="theme-color" content="#141110" />
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
-    {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href={url('/sitemap-index.xml')} />
+
+    {/* Vista previa al compartir (Open Graph y Twitter/X) */}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${perfil.nombre}: Ingeniería Civil Informática, IA aplicada a finanzas`} />
     <meta property="og:locale" content="es_CL" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
     <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body>
